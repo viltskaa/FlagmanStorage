@@ -5,27 +5,42 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#FCB4D5"
+    android:background="#FAF3E0"
     tools:context=".ShipmentProds">
+
     <Button
         android:id="@+id/button_add"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:backgroundTint="#ED3CCA"
-        android:text="+" />
+        android:backgroundTint="#FF6F61"
+        android:text="+"
+        android:textColor="@android:color/white"
+        android:textSize="24sp"
+        android:layout_marginTop="16dp"
+        android:padding="10dp"
+        android:elevation="4dp"
+        android:background="@drawable/rounded_button"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/productList"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:layout_marginTop="16dp"/>
 
     <Button
         android:id="@+id/button_send"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:backgroundTint="#ED3CCA"
-        android:text="Отгрузить" />
+        android:backgroundTint="#FF6F61"
+        android:text="Отгрузить"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:padding="12dp"
+        android:elevation="4dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/rounded_button"/>
+
 </LinearLayout>

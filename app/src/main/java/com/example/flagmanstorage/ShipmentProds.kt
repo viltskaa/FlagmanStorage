@@ -1,10 +1,13 @@
 package com.example.flagmanstorage
 
+import android.annotation.SuppressLint
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.flagmanstorage.API.APIService
+import com.example.flagmanstorage.API.ApiClient
 import com.example.flagmanstorage.QrScanner.PreferencesHelper
 import com.example.flagmanstorage.QrScanner.QrScanner
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItem
@@ -13,6 +16,9 @@ import com.example.flagmanstorage.databinding.ActivityMainBinding
 import com.example.flagmanstorage.databinding.ActivityShipmentProdsBinding
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanIntentResult
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ShipmentProds : AppCompatActivity() {
 
@@ -60,14 +66,17 @@ class ShipmentProds : AppCompatActivity() {
 
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun processScannedCode(scannedCode: String) {
         if (scannedCode.isNotEmpty()) {
-            val scannedItem = ScannedItem(scannedCode, System.currentTimeMillis())
-            preferencesHelper.saveScannedItem(scannedItem)
-            // Добавляем новый элемент в список
-            adapter.notifyDataSetChanged()  // Сообщаем адаптеру об изменениях
-            updateProductList()
-            Toast.makeText(this, "Сканированный код: ${scannedCode}", Toast.LENGTH_SHORT).show()
+            if (!preferencesHelper.isScannedItemExists(scannedCode)) { // Проверка наличия кода
+                val scannedItem = ScannedItem(scannedCode, System.currentTimeMillis())
+                preferencesHelper.saveScannedItem(scannedItem)
+                adapter.notifyDataSetChanged()
+                updateProductList()
+            } else {
+                Toast.makeText(this, "Этот код уже был сканирован", Toast.LENGTH_SHORT).show()
+            }
         } else {
             Toast.makeText(this, "Сканированный код пустой", Toast.LENGTH_SHORT).show()
         }
@@ -78,6 +87,28 @@ class ShipmentProds : AppCompatActivity() {
             qrScanner.checkCameraPermission { qrScanner.showCamera() }
         }
         binding.buttonSend.setOnClickListener{
+            val products = preferencesHelper.getScannedItems()
+            if (products.size!=0) {
+                // Инициализируем Retrofit
+                val apiService = ApiClient.getClient().create(APIService::class.java)
+                val call = apiService.sendListCodeTime(products)
+                call.enqueue(object : Callback<Void> {
+                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                        if (response.isSuccessful) {
+                            Toast.makeText(this@ShipmentProds, "Список успешно отправлен!", Toast.LENGTH_LONG).show()
+
+                        } else {
+                            Toast.makeText(this@ShipmentProds, "Response Code: ${response.code()}, Message: ${response.message()}", Toast.LENGTH_LONG).show()
+                        }
+                    }
+
+                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                        Toast.makeText(this@ShipmentProds, "Ошибка соединения: ${t.message}", Toast.LENGTH_LONG).show()
+                    }
+                })
+            } else {
+                Toast.makeText(this, "Список пуст заполните его", Toast.LENGTH_SHORT).show()
+            }
             preferencesHelper.clearAllScannedItems()
             updateProductList()
         }

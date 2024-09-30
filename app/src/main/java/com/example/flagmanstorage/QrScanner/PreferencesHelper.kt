@@ -45,4 +45,14 @@ class PreferencesHelper(context: Context) {
         }
         editor.apply()  // Применяем изменения
     }
+
+    fun isScannedItemExists(scannedCode: String): Boolean {
+        val allEntries = sharedPreferences.all
+        for ((key, value) in allEntries) {
+            if (key.startsWith("code_") && value == scannedCode) {
+                return true // Если код уже существует
+            }
+        }
+        return false // Код не найден
+    }
 }
