@@ -9,13 +9,21 @@ class PreferencesHelper(context: Context) {
     fun saveScannedItem(item: ScannedItem) {
         val editor = sharedPreferences.edit()
         // Используем уникальный идентификатор для ключа, чтобы избежать коллизий
-        val timestampKey = System.currentTimeMillis()
+        val timestampKey = item.timestamp
         editor.putString("code_$timestampKey", item.code)
         editor.putLong("timestamp_$timestampKey", item.timestamp)
         editor.apply()
     }
 
-    fun getScannedItems(): List<ScannedItem> {
+    fun removeScannedItem(item: ScannedItem){
+        val editor = sharedPreferences.edit()
+        val timestampKey = item.timestamp
+        editor.remove("code_$timestampKey")
+        editor.remove("timestamp_$timestampKey")
+        editor.apply()
+    }
+
+    fun getScannedItems(): MutableList<ScannedItem> {
         val items = mutableListOf<ScannedItem>()
         val allEntries = sharedPreferences.all
 

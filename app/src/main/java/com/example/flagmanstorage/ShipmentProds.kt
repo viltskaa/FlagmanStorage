@@ -12,7 +12,6 @@ import com.example.flagmanstorage.QrScanner.PreferencesHelper
 import com.example.flagmanstorage.QrScanner.QrScanner
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItem
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItemAdapter
-import com.example.flagmanstorage.databinding.ActivityMainBinding
 import com.example.flagmanstorage.databinding.ActivityShipmentProdsBinding
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanIntentResult
@@ -55,7 +54,7 @@ class ShipmentProds : AppCompatActivity() {
         Thread {
             val scannedItems = preferencesHelper.getScannedItems()
             runOnUiThread {
-                adapter = ScannedItemAdapter(scannedItems)
+                adapter = ScannedItemAdapter(scannedItems,preferencesHelper)
                 binding.productList.adapter = adapter
                 binding.productList.layoutManager = LinearLayoutManager(this)
             }
@@ -116,7 +115,7 @@ class ShipmentProds : AppCompatActivity() {
 
     private fun updateProductList() {
         val products = preferencesHelper.getScannedItems() // Получаем обновленный список продуктов
-        val adapter = ScannedItemAdapter(products) // Создаем новый адаптер
+        val adapter = ScannedItemAdapter(products,preferencesHelper) // Создаем новый адаптер
         binding.productList.adapter = adapter // Устанавливаем адаптер в RecyclerView
     }
     private fun initBinding() {
