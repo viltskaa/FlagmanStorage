@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import com.example.flagmanstorage.API.APIService
 import com.example.flagmanstorage.API.ApiClient
 import com.example.flagmanstorage.QrScanner.QrScanner
+import com.example.flagmanstorage.QrScanner.UserPreferences
 import com.example.flagmanstorage.databinding.ActivityMainBinding
 
 import com.journeyapps.barcodescanner.ScanContract
@@ -21,6 +22,7 @@ import retrofit2.Response
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var qrScanner: QrScanner
+    private lateinit var userPreferences: UserPreferences
 
     private val scanLauncher = registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
         qrScanner.handleScanResult(result) { scannedCode ->
@@ -38,6 +40,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        userPreferences = UserPreferences(this)
+        if (!userPreferences.isLoggedIn()) {
+            val intent = Intent(this, MainActivity2::class.java)
+            startActivity(intent)
+            finish()
+        }
+
         initBinding()
         initViews()
 
@@ -45,15 +55,16 @@ class MainActivity : AppCompatActivity() {
         qrScanner = QrScanner(this, scanLauncher, requestPermissionLauncher)
 
 
-        binding.btnAddToShipping.setOnClickListener{
-            val intent = Intent(this, ShipmentProds::class.java)
-            startActivity(intent)
-        }
+
     }
 
     private fun initViews() {
         binding.btnAddToWarehouse.setOnClickListener {
             qrScanner.checkCameraPermission { qrScanner.showCamera() }
+        }
+        binding.btnAddToShipping.setOnClickListener{
+            val intent = Intent(this, ShipmentProds::class.java)
+            startActivity(intent)
         }
     }
 
@@ -83,5 +94,18 @@ class MainActivity : AppCompatActivity() {
     private fun initBinding() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        val userName = userPreferences.getUserName()
+        if (userName != null) {
+            binding.userInfo.text = "Авторизован: $userName"
+        }
+
+        // Кнопка выхода
+        binding.btnLogout.setOnClickListener {
+            userPreferences.clearUserName() // Очищаем данные пользователя
+            userPreferences.logout()
+            val intent = Intent(this, MainActivity2::class.java)
+            startActivity(intent)
+            finish() // Закрываем активность
+        }
     }
 }

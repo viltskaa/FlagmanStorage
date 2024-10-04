@@ -1,6 +1,7 @@
 package com.example.flagmanstorage
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
@@ -12,6 +13,7 @@ import com.example.flagmanstorage.QrScanner.PreferencesHelper
 import com.example.flagmanstorage.QrScanner.QrScanner
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItem
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItemAdapter
+import com.example.flagmanstorage.QrScanner.UserPreferences
 import com.example.flagmanstorage.databinding.ActivityShipmentProdsBinding
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanIntentResult
@@ -25,7 +27,7 @@ class ShipmentProds : AppCompatActivity() {
     private lateinit var qrScanner: QrScanner
     private lateinit var preferencesHelper: PreferencesHelper
     private lateinit var adapter: ScannedItemAdapter
-
+    private lateinit var userPreferences: UserPreferences
     private val scanLauncher = registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
         qrScanner.handleScanResult(result) { scannedCode ->
             processScannedCode(scannedCode)
@@ -43,7 +45,12 @@ class ShipmentProds : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initBinding()
-
+        userPreferences = UserPreferences(this)
+        if (!userPreferences.isLoggedIn()) {
+            val intent = Intent(this, MainActivity2::class.java)
+            startActivity(intent)
+            finish()
+        }
         // Инициализация qrScanner после инициализации binding
         qrScanner = QrScanner(this, scanLauncher, requestPermissionLauncher)
 

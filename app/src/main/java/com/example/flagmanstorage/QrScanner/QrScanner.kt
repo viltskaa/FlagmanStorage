@@ -2,13 +2,17 @@ package com.example.flagmanstorage.QrScanner
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
+import com.example.flagmanstorage.MainActivity
 import com.journeyapps.barcodescanner.ScanIntentResult
 
 import com.journeyapps.barcodescanner.ScanOptions
+import org.json.JSONException
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -28,10 +32,20 @@ class QrScanner(
             requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
         }
     }
-
     fun showCamera() {
         val options = ScanOptions().apply {
             setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES)
+            setPrompt("Сканируйте QR-код")
+            setCameraId(0)
+            setBeepEnabled(false)
+            setBarcodeImageEnabled(true)
+            setOrientationLocked(false)
+        }
+        scanLauncher.launch(options)
+    }
+    fun showCameraForQrOnly() {
+        val options = ScanOptions().apply {
+            setDesiredBarcodeFormats(ScanOptions.QR_CODE) // Устанавливаем только формат QR-кодов
             setPrompt("Сканируйте QR-код")
             setCameraId(0)
             setBeepEnabled(false)
@@ -48,5 +62,27 @@ class QrScanner(
             onScanSuccessful(result.contents)
         }
     }
+
+    fun handleQrScanResult(result: ScanIntentResult, onJsonParsed: (String) -> Unit, onError: () -> Unit) {
+        if (result.contents == null) {
+            Toast.makeText(activity, "Сканирование отменено", Toast.LENGTH_SHORT).show()
+        } else {
+            try {
+                // Предполагается, что результат содержимого QR-кода — это JSON строка
+                val jsonObject = JSONObject(result.contents)
+                val name = jsonObject.getString("name")
+                onJsonParsed(name) // Возвращаем значение "name"
+                UserPreferences(activity).saveUserName(name)
+                UserPreferences(activity).saveLoginStatus(true)
+                val intent = Intent(activity, MainActivity::class.java)
+                activity.startActivity(intent)
+                activity.finish()
+            } catch (e: JSONException) {
+                onError() // Возвращаем ошибку в случае некорректного JSON
+                Toast.makeText(activity, "Ошибка при разборе данных QR-кода", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 }
+
 

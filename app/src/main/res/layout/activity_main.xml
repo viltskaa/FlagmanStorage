@@ -1,55 +1,85 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center"
     android:padding="16dp"
     android:background="#FAF3E0"
     tools:context=".MainActivity">
 
-    <!-- Кнопка для внесения товара на склад -->
-    <Button
-        android:id="@+id/btn_add_to_warehouse"
+    <!-- Плашка с текстом о пользователе и кнопкой "Выйти" -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Внесение товара на склад"
-        android:textSize="18sp"
-        android:backgroundTint="#FF6F61"
-        android:textColor="@android:color/white"
-        android:layout_marginBottom="16dp"
-        android:elevation="4dp"
-        android:padding="12dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/rounded_button"/>
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:backgroundTint="#714BA6"
+        android:background="@drawable/rounded_button">
 
-    <!-- Кнопка для внесения товара на отгрузку -->
-    <Button
-        android:id="@+id/btn_add_to_shipping"
+        <TextView
+            android:id="@+id/user_info"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_weight="1"
+            android:text="Авторизован: "
+            android:textSize="18sp"
+            android:textColor="#fdfdfd" />
+
+        <Button
+            android:id="@+id/btn_logout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Выйти"
+            android:textColor="#ffffff"
+            android:backgroundTint="#201E28" />
+    </LinearLayout>
+
+    <!-- Контейнер для кнопок, выровненных по центру -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Внесение товара на отгрузку"
-        android:textSize="18sp"
-        android:backgroundTint="#FF6F61"
-        android:textColor="@android:color/white"
-        android:layout_marginBottom="16dp"
-        android:elevation="4dp"
-        android:padding="12dp"
-        android:background="@drawable/rounded_button"/>
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
 
-    <!-- Кнопка для переупаковки товара -->
-    <Button
-        android:id="@+id/btn_repack"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Переупаковка"
-        android:textSize="18sp"
-        android:backgroundTint="#FF6F61"
-        android:textColor="@android:color/white"
-        android:elevation="4dp"
-        android:padding="12dp"
-        android:background="@drawable/rounded_button"/>
+        <Button
+            android:id="@+id/btn_add_to_warehouse"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Внесение товара на склад"
+            android:textSize="18sp"
+            android:backgroundTint="#A361FF"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="16dp"
+            android:elevation="4dp"
+            android:padding="12dp"
+            android:background="@drawable/rounded_button"/>
 
+        <Button
+            android:id="@+id/btn_add_to_shipping"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Внесение товара на отгрузку"
+            android:textSize="18sp"
+            android:backgroundTint="#A361FF"
+            android:textColor="@android:color/white"
+            android:layout_marginBottom="16dp"
+            android:elevation="4dp"
+            android:padding="12dp"
+            android:background="@drawable/rounded_button"/>
+
+        <Button
+            android:id="@+id/btn_repack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Переупаковка"
+            android:textSize="18sp"
+            android:backgroundTint="#A361FF"
+            android:textColor="@android:color/white"
+            android:elevation="4dp"
+            android:padding="12dp"
+            android:background="@drawable/rounded_button"/>
+    </LinearLayout>
 </LinearLayout>
