@@ -3,7 +3,7 @@ package com.example.flagmanstorage.API
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 object ApiClient {
-    private const val BASE_URL = "https://your-server.com" // URL вашего сервера
+    private const val BASE_URL = "http://192.168.1.42:8080"  // URL вашего сервера
 
     private var retrofit: Retrofit? = null
 

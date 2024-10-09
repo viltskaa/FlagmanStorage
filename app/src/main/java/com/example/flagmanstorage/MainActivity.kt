@@ -2,6 +2,7 @@ package com.example.flagmanstorage
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -84,6 +85,7 @@ class MainActivity : AppCompatActivity() {
 
                 override fun onFailure(call: Call<Void>, t: Throwable) {
                     Toast.makeText(this@MainActivity, "Ошибка соединения: ${t.message}", Toast.LENGTH_LONG).show()
+                    t.message?.let { Log.d("NADO", it) }
                 }
             })
         } else {
