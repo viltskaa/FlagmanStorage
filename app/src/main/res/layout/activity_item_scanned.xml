@@ -37,6 +37,14 @@
             android:textColor="#757575"
             android:fontFamily="sans-serif-light"
             android:layout_gravity="center"/>
+        <TextView
+            android:id="@+id/textCords"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="#757575"
+            android:fontFamily="sans-serif-light"
+            android:layout_gravity="center"/>
     </LinearLayout>
 
     <!-- Кнопка справа -->

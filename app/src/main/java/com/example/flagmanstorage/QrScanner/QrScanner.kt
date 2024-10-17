@@ -34,7 +34,7 @@ class QrScanner(
     }
     fun showCamera() {
         val options = ScanOptions().apply {
-            setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES)
+            setDesiredBarcodeFormats(ScanOptions.CODE_128)
             setPrompt("Сканируйте QR-код")
             setCameraId(0)
             setBeepEnabled(false)

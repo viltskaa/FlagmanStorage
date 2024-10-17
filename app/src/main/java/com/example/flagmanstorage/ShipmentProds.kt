@@ -1,7 +1,12 @@
 package com.example.flagmanstorage
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
@@ -28,6 +33,10 @@ class ShipmentProds : AppCompatActivity() {
     private lateinit var preferencesHelper: PreferencesHelper
     private lateinit var adapter: ScannedItemAdapter
     private lateinit var userPreferences: UserPreferences
+    private lateinit var sensorManager: SensorManager
+    private lateinit var accelerometer: Sensor
+    private var accelerometerValues = FloatArray(3) // x, y, z координаты
+
     private val scanLauncher = registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
         qrScanner.handleScanResult(result) { scannedCode ->
             processScannedCode(scannedCode)
@@ -46,43 +55,67 @@ class ShipmentProds : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         initBinding()
         userPreferences = UserPreferences(this)
+
         if (!userPreferences.isLoggedIn()) {
             val intent = Intent(this, MainActivity2::class.java)
             startActivity(intent)
             finish()
         }
-        // Инициализация qrScanner после инициализации binding
+
         qrScanner = QrScanner(this, scanLauncher, requestPermissionLauncher)
 
-        initViews() // Теперь инициализация views происходит после qrScanner
+        initViews()
         preferencesHelper = PreferencesHelper(this)
 
+        // Инициализация SensorManager и акселерометра
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)!!
 
         Thread {
             val scannedItems = preferencesHelper.getScannedItems()
             runOnUiThread {
-                adapter = ScannedItemAdapter(scannedItems,preferencesHelper)
+                adapter = ScannedItemAdapter(scannedItems, preferencesHelper)
                 binding.productList.adapter = adapter
                 binding.productList.layoutManager = LinearLayoutManager(this)
             }
         }.start()
-        // Загрузка данных из кэша
+    }
 
-        // Инициализация адаптера и привязка к RecyclerView
+    private val sensorEventListener = object : SensorEventListener {
+        override fun onSensorChanged(event: SensorEvent) {
+            if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+                accelerometerValues[0] = event.values[0] // Данные по оси X
+                accelerometerValues[1] = event.values[1] // Данные по оси Y
+                accelerometerValues[2] = event.values[2] // Данные по оси Z
+            }
+        }
 
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+            // Не требуется
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        sensorManager.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(sensorEventListener)
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private fun processScannedCode(scannedCode: String) {
         if (scannedCode.isNotEmpty()) {
-            if (!preferencesHelper.isScannedItemExists(scannedCode)) { // Проверка наличия кода
-                val scannedItem = ScannedItem(scannedCode, System.currentTimeMillis())
-                preferencesHelper.saveScannedItem(scannedItem)
-                adapter.notifyDataSetChanged()
-                updateProductList()
-            } else {
-                Toast.makeText(this, "Этот код уже был сканирован", Toast.LENGTH_SHORT).show()
-            }
+            val scannedItem = ScannedItem(scannedCode, System.currentTimeMillis(),
+                accelerometerValues[0],
+                accelerometerValues[1],
+                accelerometerValues[2]
+            )
+            preferencesHelper.saveScannedItem(scannedItem)
+            adapter.notifyDataSetChanged()
+            updateProductList()
         } else {
             Toast.makeText(this, "Сканированный код пустой", Toast.LENGTH_SHORT).show()
         }
@@ -92,17 +125,17 @@ class ShipmentProds : AppCompatActivity() {
         binding.buttonAdd.setOnClickListener {
             qrScanner.checkCameraPermission { qrScanner.showCamera() }
         }
-        binding.buttonSend.setOnClickListener{
+
+        binding.buttonSend.setOnClickListener {
             val products = preferencesHelper.getScannedItems()
-            if (products.size!=0) {
-                // Инициализируем Retrofit
+            if (products.isNotEmpty()) {
+                // Инициализация Retrofit
                 val apiService = ApiClient.getClient().create(APIService::class.java)
                 val call = apiService.sendListCodeTime(products)
                 call.enqueue(object : Callback<Void> {
                     override fun onResponse(call: Call<Void>, response: Response<Void>) {
                         if (response.isSuccessful) {
                             Toast.makeText(this@ShipmentProds, "Список успешно отправлен!", Toast.LENGTH_LONG).show()
-
                         } else {
                             Toast.makeText(this@ShipmentProds, "Response Code: ${response.code()}, Message: ${response.message()}", Toast.LENGTH_LONG).show()
                         }
@@ -113,7 +146,7 @@ class ShipmentProds : AppCompatActivity() {
                     }
                 })
             } else {
-                Toast.makeText(this, "Список пуст заполните его", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Список пуст, заполните его", Toast.LENGTH_SHORT).show()
             }
             preferencesHelper.clearAllScannedItems()
             updateProductList()
@@ -122,11 +155,14 @@ class ShipmentProds : AppCompatActivity() {
 
     private fun updateProductList() {
         val products = preferencesHelper.getScannedItems() // Получаем обновленный список продуктов
-        val adapter = ScannedItemAdapter(products,preferencesHelper) // Создаем новый адаптер
+        val adapter = ScannedItemAdapter(products, preferencesHelper) // Создаем новый адаптер
         binding.productList.adapter = adapter // Устанавливаем адаптер в RecyclerView
     }
+
     private fun initBinding() {
         binding = ActivityShipmentProdsBinding.inflate(layoutInflater)
         setContentView(binding.root)
     }
 }
+
+

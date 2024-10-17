@@ -13,19 +13,29 @@ class PreferencesHelper(context: Context) {
     }
 
     fun saveScannedItem(item: ScannedItem) {
+        if (isScannedItemExists(item.code, item.positionX, item.positionY, item.positionZ)) {
+            return
+        }
         val editor = sharedPreferences.edit()
-        // Используем уникальный идентификатор для ключа, чтобы избежать коллизий
-        val timestampKey = item.timestamp
-        editor.putString("${getUserKeyPrefix()}code_$timestampKey", item.code)
-        editor.putLong("${getUserKeyPrefix()}timestamp_$timestampKey", item.timestamp)
+        val uniqueKey = "${item.code}_${item.timestamp}" // Создаем уникальный ключ на основе штрихкода и временной метки
+        editor.putString("${getUserKeyPrefix()}code_$uniqueKey", item.code)
+        editor.putLong("${getUserKeyPrefix()}timestamp_$uniqueKey", item.timestamp)
+        // Можно добавить сохранение данных о положении устройства
+        editor.putFloat("${getUserKeyPrefix()}posX_$uniqueKey", item.positionX)
+        editor.putFloat("${getUserKeyPrefix()}posY_$uniqueKey", item.positionY)
+        editor.putFloat("${getUserKeyPrefix()}posZ_$uniqueKey", item.positionZ)
         editor.apply()
     }
 
     fun removeScannedItem(item: ScannedItem) {
+        val uniqueKey = "${item.code}_${item.timestamp}"
         val editor = sharedPreferences.edit()
-        val timestampKey = item.timestamp
-        editor.remove("${getUserKeyPrefix()}code_$timestampKey")
-        editor.remove("${getUserKeyPrefix()}timestamp_$timestampKey")
+        editor.remove("${getUserKeyPrefix()}code_$uniqueKey")
+        editor.remove("${getUserKeyPrefix()}timestamp_$uniqueKey")
+        // Удаляем данные о положении устройства
+        editor.remove("${getUserKeyPrefix()}posX_$uniqueKey")
+        editor.remove("${getUserKeyPrefix()}posY_$uniqueKey")
+        editor.remove("${getUserKeyPrefix()}posZ_$uniqueKey")
         editor.apply()
     }
 
@@ -36,10 +46,14 @@ class PreferencesHelper(context: Context) {
         // Итерируемся по всем записям в SharedPreferences
         for ((key, value) in allEntries) {
             if (key.startsWith("${getUserKeyPrefix()}code_") && value is String) {
-                val timestampKey = key.replace("${getUserKeyPrefix()}code_", "${getUserKeyPrefix()}timestamp_")
-                // Извлекаем временную метку, если она существует
-                val timestamp = allEntries[timestampKey] as? Long ?: continue
-                items.add(ScannedItem(value, timestamp))
+                val uniqueKey = key.replace("${getUserKeyPrefix()}code_", "")
+                val timestamp = sharedPreferences.getLong("${getUserKeyPrefix()}timestamp_$uniqueKey", 0L)
+                val positionX = sharedPreferences.getFloat("${getUserKeyPrefix()}posX_$uniqueKey", 0f)
+                val positionY = sharedPreferences.getFloat("${getUserKeyPrefix()}posY_$uniqueKey", 0f)
+                val positionZ = sharedPreferences.getFloat("${getUserKeyPrefix()}posZ_$uniqueKey", 0f)
+                if (timestamp != 0L) {
+                    items.add(ScannedItem(value, timestamp, positionX, positionY, positionZ))
+                }
             }
         }
         items.sortByDescending { it.timestamp }
@@ -52,21 +66,32 @@ class PreferencesHelper(context: Context) {
 
         // Итерируемся по всем записям в SharedPreferences
         for ((key, _) in allEntries) {
-            // Удаляем только те ключи, которые начинаются с имени пользователя
             if (key.startsWith(getUserKeyPrefix())) {
                 editor.remove(key)
             }
         }
-        editor.apply()  // Применяем изменения
+        editor.apply()
     }
 
-    fun isScannedItemExists(scannedCode: String): Boolean {
+    fun isScannedItemExists(scannedCode: String, positionX: Float, positionY: Float, positionZ: Float): Boolean {
         val allEntries = sharedPreferences.all
         for ((key, value) in allEntries) {
             if (key.startsWith("${getUserKeyPrefix()}code_") && value == scannedCode) {
-                return true // Если код уже существует
+                val uniqueKey = key.replace("${getUserKeyPrefix()}code_", "")
+                val savedX = sharedPreferences.getFloat("${getUserKeyPrefix()}posX_$uniqueKey", 0f)
+                val savedY = sharedPreferences.getFloat("${getUserKeyPrefix()}posY_$uniqueKey", 0f)
+                val savedZ = sharedPreferences.getFloat("${getUserKeyPrefix()}posZ_$uniqueKey", 0f)
+                if (isPositionSimilar(savedX, savedY, savedZ, positionX, positionY, positionZ)) {
+                    return true
+                }
             }
         }
-        return false // Код не найден
+        return false
+    }
+
+    private fun isPositionSimilar(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float): Boolean {
+        val tolerance = 2.0f
+        return Math.abs(x1 - x2) < tolerance &&
+                Math.abs(y1 - y2) < tolerance
     }
 }

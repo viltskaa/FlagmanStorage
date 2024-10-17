@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.flagmanstorage.QrScanner.PreferencesHelper
 import com.example.flagmanstorage.databinding.ActivityItemScannedBinding
 
-class ScannedItemAdapter(private val scannedItems: MutableList<ScannedItem>, private val preferencesHelper: PreferencesHelper) :
+class ScannedItemAdapter(private var scannedItems: MutableList<ScannedItem>, private val preferencesHelper: PreferencesHelper) :
     RecyclerView.Adapter<ScannedItemAdapter.ScannedItemViewHolder>() {
 
     inner class ScannedItemViewHolder(private val binding: ActivityItemScannedBinding) :
@@ -14,6 +14,7 @@ class ScannedItemAdapter(private val scannedItems: MutableList<ScannedItem>, pri
         fun bind(scannedItem: ScannedItem) {
             binding.textViewCode.text = scannedItem.code
             binding.textViewTime.text = java.text.SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(scannedItem.timestamp)
+            binding.textCords.text="X: " + scannedItem.positionX.toString() + " Y:" + scannedItem.positionY.toString() + " Z:" + scannedItem.positionZ.toString()
             binding.buttonAction.setOnClickListener {
                 preferencesHelper.removeScannedItem(scannedItem)
                 removeItem(adapterPosition)
@@ -31,7 +32,6 @@ class ScannedItemAdapter(private val scannedItems: MutableList<ScannedItem>, pri
     }
 
     override fun getItemCount(): Int = scannedItems.size
-
     private fun removeItem(position: Int) {
         scannedItems.removeAt(position)  // Удаляем элемент из списка
         notifyItemRemoved(position)      // Уведомляем адаптер об удалении элемента
