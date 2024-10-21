@@ -1,7 +1,10 @@
 package com.example.flagmanstorage.QrScanner
 
 import android.content.Context
+import com.example.flagmanstorage.QrScanner.ScannedItem.ItemFromWB
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItem
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class PreferencesHelper(context: Context) {
     private val sharedPreferences = context.getSharedPreferences("ScannedItems", Context.MODE_PRIVATE)
@@ -13,9 +16,6 @@ class PreferencesHelper(context: Context) {
     }
 
     fun saveScannedItem(item: ScannedItem) {
-        if (isScannedItemExists(item.code, item.positionX, item.positionY, item.positionZ)) {
-            return
-        }
         val editor = sharedPreferences.edit()
         val uniqueKey = "${item.code}_${item.timestamp}" // Создаем уникальный ключ на основе штрихкода и временной метки
         editor.putString("${getUserKeyPrefix()}code_$uniqueKey", item.code)
@@ -26,6 +26,7 @@ class PreferencesHelper(context: Context) {
         editor.putFloat("${getUserKeyPrefix()}posZ_$uniqueKey", item.positionZ)
         editor.apply()
     }
+
 
     fun removeScannedItem(item: ScannedItem) {
         val uniqueKey = "${item.code}_${item.timestamp}"
@@ -90,8 +91,33 @@ class PreferencesHelper(context: Context) {
     }
 
     private fun isPositionSimilar(x1: Float, y1: Float, z1: Float, x2: Float, y2: Float, z2: Float): Boolean {
-        val tolerance = 2.0f
+        val tolerance = 1.5f
         return Math.abs(x1 - x2) < tolerance &&
                 Math.abs(y1 - y2) < tolerance
+    }
+
+    // Метод для сохранения списка заказов Wildberries в кэш
+    fun saveItemsFromWB(items: MutableList<ItemFromWB>) {
+        val editor = sharedPreferences.edit()
+
+        // Преобразуем список объектов ArticleCount в JSON-строку
+        val gson = Gson()
+        val jsonItems = gson.toJson(items)
+
+        // Сохраняем JSON-строку в SharedPreferences
+        editor.putString("${getUserKeyPrefix()}wb_items", jsonItems)
+        editor.apply()
+    }
+
+    // Метод для извлечения списка объектов ArticleCount из кэша
+    fun getItemsFromWB(): MutableList<ItemFromWB> {
+        // Получаем JSON-строку из SharedPreferences
+        val jsonItems = sharedPreferences.getString("${getUserKeyPrefix()}wb_items", null) ?: return mutableListOf()
+
+        // Преобразуем JSON-строку обратно в список объектов ArticleCount
+        val gson = Gson()
+        val type = object : TypeToken<MutableList<ItemFromWB>>() {}.type
+
+        return gson.fromJson(jsonItems, type)
     }
 }

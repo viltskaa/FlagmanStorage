@@ -1,13 +1,10 @@
 package com.example.flagmanstorage
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import com.example.flagmanstorage.API.APIService
 import com.example.flagmanstorage.API.ApiClient
 import com.example.flagmanstorage.QrScanner.QrScanner
@@ -22,22 +19,9 @@ import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var qrScanner: QrScanner
     private lateinit var userPreferences: UserPreferences
 
-    private val scanLauncher = registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
-        qrScanner.handleScanResult(result) { scannedCode ->
-            setResult(scannedCode)
-        }
-    }
 
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-        if (isGranted) {
-            qrScanner.showCamera()
-        } else {
-            Toast.makeText(this, "Требуется разрешение на использование камеры", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,46 +36,20 @@ class MainActivity : AppCompatActivity() {
         initBinding()
         initViews()
 
-        // Создаем экземпляр QrScanner
-        qrScanner = QrScanner(this, scanLauncher, requestPermissionLauncher)
-
-
 
     }
 
     private fun initViews() {
         binding.btnAddToWarehouse.setOnClickListener {
-            qrScanner.checkCameraPermission { qrScanner.showCamera() }
+            val intent = Intent(this, IntroductionProds::class.java)
+            startActivity(intent)
         }
         binding.btnAddToShipping.setOnClickListener{
-            val intent = Intent(this, ShipmentProds::class.java)
+            val intent = Intent(this, ShipmentsProds::class.java)
             startActivity(intent)
         }
     }
 
-    private fun setResult(scannedCode: String) {
-        if (scannedCode.isNotEmpty()) {
-            // Инициализируем Retrofit
-            val apiService = ApiClient.getClient().create(APIService::class.java)
-            val call = apiService.sendScannedCode(scannedCode)
-            call.enqueue(object : Callback<Void> {
-                override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                    if (response.isSuccessful) {
-                        Toast.makeText(this@MainActivity, "Код успешно отправлен!", Toast.LENGTH_LONG).show()
-                    } else {
-                        Toast.makeText(this@MainActivity, "Response Code: ${response.code()}, Message: ${response.message()}", Toast.LENGTH_LONG).show()
-                    }
-                }
-
-                override fun onFailure(call: Call<Void>, t: Throwable) {
-                    Toast.makeText(this@MainActivity, "Ошибка соединения: ${t.message}", Toast.LENGTH_LONG).show()
-                    t.message?.let { Log.d("NADO", it) }
-                }
-            })
-        } else {
-            Toast.makeText(this, "Сканированный код пустой", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     private fun initBinding() {
         binding = ActivityMainBinding.inflate(layoutInflater)

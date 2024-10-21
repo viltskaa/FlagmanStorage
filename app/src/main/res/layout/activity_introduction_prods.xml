@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#FAF3E0"
-    tools:context=".ShipmentProds">
+    tools:context=".IntroductionProds">
 
     <Button
         android:id="@+id/button_add"
@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:backgroundTint="#FF6F61"
-        android:text="Отгрузить"
+        android:text="Загрузить"
         android:textColor="@android:color/white"
         android:textSize="18sp"
         android:padding="12dp"

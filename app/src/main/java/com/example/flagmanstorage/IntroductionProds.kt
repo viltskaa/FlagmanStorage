@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.flagmanstorage.API.APIService
 import com.example.flagmanstorage.API.ApiClient
@@ -19,16 +20,16 @@ import com.example.flagmanstorage.QrScanner.QrScanner
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItem
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItemAdapter
 import com.example.flagmanstorage.QrScanner.UserPreferences
-import com.example.flagmanstorage.databinding.ActivityShipmentProdsBinding
+import com.example.flagmanstorage.databinding.ActivityIntroductionProdsBinding
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanIntentResult
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class ShipmentProds : AppCompatActivity() {
+class IntroductionProds : AppCompatActivity() {
 
-    private lateinit var binding: ActivityShipmentProdsBinding
+    private lateinit var binding: ActivityIntroductionProdsBinding
     private lateinit var qrScanner: QrScanner
     private lateinit var preferencesHelper: PreferencesHelper
     private lateinit var adapter: ScannedItemAdapter
@@ -108,14 +109,40 @@ class ShipmentProds : AppCompatActivity() {
     @SuppressLint("NotifyDataSetChanged")
     private fun processScannedCode(scannedCode: String) {
         if (scannedCode.isNotEmpty()) {
-            val scannedItem = ScannedItem(scannedCode, System.currentTimeMillis(),
+            val scannedItem = ScannedItem(
+                scannedCode,
+                System.currentTimeMillis(),
                 accelerometerValues[0],
                 accelerometerValues[1],
                 accelerometerValues[2]
             )
-            preferencesHelper.saveScannedItem(scannedItem)
-            adapter.notifyDataSetChanged()
-            updateProductList()
+
+            if (preferencesHelper.isScannedItemExists(scannedItem.code, scannedItem.positionX, scannedItem.positionY, scannedItem.positionZ)) {
+                // Создаем диалоговое окно для подтверждения
+                val builder = AlertDialog.Builder(this)
+                builder.setTitle("Повторное добавление")
+                builder.setMessage("Кажется, этот код уже был добавлен. Вы уверены, что хотите добавить его снова?")
+
+                // Если пользователь выбрал "Да"
+                builder.setPositiveButton("Да") { dialog, which ->
+                    preferencesHelper.saveScannedItem(scannedItem)
+                    adapter.notifyDataSetChanged()
+                    updateProductList()
+                }
+
+                // Если пользователь выбрал "Нет"
+                builder.setNegativeButton("Нет") { dialog, which ->
+                    dialog.dismiss()
+                }
+
+                // Показываем диалог
+                builder.show()
+            } else {
+                // Если элемент не существует, добавляем его без подтверждения
+                preferencesHelper.saveScannedItem(scannedItem)
+                adapter.notifyDataSetChanged()
+                updateProductList()
+            }
         } else {
             Toast.makeText(this, "Сканированный код пустой", Toast.LENGTH_SHORT).show()
         }
@@ -135,14 +162,14 @@ class ShipmentProds : AppCompatActivity() {
                 call.enqueue(object : Callback<Void> {
                     override fun onResponse(call: Call<Void>, response: Response<Void>) {
                         if (response.isSuccessful) {
-                            Toast.makeText(this@ShipmentProds, "Список успешно отправлен!", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@IntroductionProds, "Список успешно отправлен!", Toast.LENGTH_LONG).show()
                         } else {
-                            Toast.makeText(this@ShipmentProds, "Response Code: ${response.code()}, Message: ${response.message()}", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@IntroductionProds, "Response Code: ${response.code()}, Message: ${response.message()}", Toast.LENGTH_LONG).show()
                         }
                     }
 
                     override fun onFailure(call: Call<Void>, t: Throwable) {
-                        Toast.makeText(this@ShipmentProds, "Ошибка соединения: ${t.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@IntroductionProds, "Ошибка соединения: ${t.message}", Toast.LENGTH_LONG).show()
                     }
                 })
             } else {
@@ -160,7 +187,7 @@ class ShipmentProds : AppCompatActivity() {
     }
 
     private fun initBinding() {
-        binding = ActivityShipmentProdsBinding.inflate(layoutInflater)
+        binding = ActivityIntroductionProdsBinding.inflate(layoutInflater)
         setContentView(binding.root)
     }
 }
