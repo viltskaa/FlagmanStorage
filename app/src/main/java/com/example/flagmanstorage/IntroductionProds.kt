@@ -19,6 +19,7 @@ import com.example.flagmanstorage.QrScanner.PreferencesHelper
 import com.example.flagmanstorage.QrScanner.QrScanner
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItem
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItemAdapter
+import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItemDisplayAdapter
 import com.example.flagmanstorage.QrScanner.UserPreferences
 import com.example.flagmanstorage.databinding.ActivityIntroductionProdsBinding
 import com.journeyapps.barcodescanner.ScanContract
@@ -32,7 +33,7 @@ class IntroductionProds : AppCompatActivity() {
     private lateinit var binding: ActivityIntroductionProdsBinding
     private lateinit var qrScanner: QrScanner
     private lateinit var preferencesHelper: PreferencesHelper
-    private lateinit var adapter: ScannedItemAdapter
+    private lateinit var adapter: ScannedItemDisplayAdapter
     private lateinit var userPreferences: UserPreferences
     private lateinit var sensorManager: SensorManager
     private lateinit var accelerometer: Sensor
@@ -73,9 +74,9 @@ class IntroductionProds : AppCompatActivity() {
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)!!
 
         Thread {
-            val scannedItems = preferencesHelper.getScannedItems()
+            val scannedItems = preferencesHelper.getGroupedScannedItems()
             runOnUiThread {
-                adapter = ScannedItemAdapter(scannedItems, preferencesHelper)
+                adapter = ScannedItemDisplayAdapter(scannedItems, preferencesHelper)
                 binding.productList.adapter = adapter
                 binding.productList.layoutManager = LinearLayoutManager(this)
             }
@@ -181,8 +182,8 @@ class IntroductionProds : AppCompatActivity() {
     }
 
     private fun updateProductList() {
-        val products = preferencesHelper.getScannedItems() // Получаем обновленный список продуктов
-        val adapter = ScannedItemAdapter(products, preferencesHelper) // Создаем новый адаптер
+        val products = preferencesHelper.getGroupedScannedItems() // Получаем обновленный список продуктов
+        val adapter = ScannedItemDisplayAdapter(products, preferencesHelper) // Создаем новый адаптер
         binding.productList.adapter = adapter // Устанавливаем адаптер в RecyclerView
     }
 

@@ -6,17 +6,20 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.flagmanstorage.QrScanner.PreferencesHelper
 import com.example.flagmanstorage.databinding.ActivityItemScannedBinding
 
-class ScannedItemAdapter(private var scannedItems: MutableList<ScannedItem>, private val preferencesHelper: PreferencesHelper) :
-    RecyclerView.Adapter<ScannedItemAdapter.ScannedItemViewHolder>() {
+class ScannedItemDisplayAdapter(private var scannedItems: MutableList<ScannedItemDisplay>, private val preferencesHelper: PreferencesHelper) :
+    RecyclerView.Adapter<ScannedItemDisplayAdapter.ScannedItemViewHolder>() {
 
     inner class ScannedItemViewHolder(private val binding: ActivityItemScannedBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(scannedItem: ScannedItem) {
+        fun bind(scannedItem: ScannedItemDisplay) {
             binding.textViewCode.text = scannedItem.code
-            binding.textCords.text="X: " + scannedItem.positionX.toString() + " Y:" + scannedItem.positionY.toString() + " Z:" + scannedItem.positionZ.toString()
+            binding.textCords.text=scannedItem.count.toString()
             binding.buttonAction.setOnClickListener {
-                preferencesHelper.removeScannedItem(scannedItem)
-                removeItem(adapterPosition)
+                preferencesHelper.removeLastScannedItemByCode(scannedItem.code)
+                if(scannedItem.count==1)
+                {
+                    removeItem(adapterPosition)
+                }
             }
         }
     }

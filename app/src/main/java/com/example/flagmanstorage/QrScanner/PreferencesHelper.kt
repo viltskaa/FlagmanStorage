@@ -3,6 +3,7 @@ package com.example.flagmanstorage.QrScanner
 import android.content.Context
 import com.example.flagmanstorage.QrScanner.ScannedItem.ItemFromWB
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItem
+import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItemDisplay
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -40,6 +41,29 @@ class PreferencesHelper(context: Context) {
         editor.apply()
     }
 
+    fun removeLastScannedItemByCode(code: String) {
+        // Получаем все отсканированные элементы из кэша
+        val scannedItems = getScannedItems() // Метод, который возвращает все отсканированные элементы
+
+        // Находим последний добавленный элемент с заданным кодом
+        val lastItem = scannedItems
+            .filter { it.code == code }
+            .maxByOrNull { it.timestamp } // Находим элемент с максимальным timestamp
+
+        // Если такой элемент найден, удаляем его
+        lastItem?.let {
+            val uniqueKey = "${it.code}_${it.timestamp}"
+            val editor = sharedPreferences.edit()
+            editor.remove("${getUserKeyPrefix()}code_$uniqueKey")
+            editor.remove("${getUserKeyPrefix()}timestamp_$uniqueKey")
+            // Удаляем данные о положении устройства
+            editor.remove("${getUserKeyPrefix()}posX_$uniqueKey")
+            editor.remove("${getUserKeyPrefix()}posY_$uniqueKey")
+            editor.remove("${getUserKeyPrefix()}posZ_$uniqueKey")
+            editor.apply()
+        }
+    }
+
     fun getScannedItems(): MutableList<ScannedItem> {
         val items = mutableListOf<ScannedItem>()
         val allEntries = sharedPreferences.all
@@ -59,6 +83,30 @@ class PreferencesHelper(context: Context) {
         }
         items.sortByDescending { it.timestamp }
         return items
+    }
+
+    fun getGroupedScannedItems(): MutableList<ScannedItemDisplay> {
+        val groupedItems = mutableMapOf<String, Int>() // Словарь для группировки
+
+        val allEntries = sharedPreferences.all
+
+        // Итерируемся по всем записям в SharedPreferences
+        for ((key, value) in allEntries) {
+            if (key.startsWith("${getUserKeyPrefix()}code_") && value is String) {
+                val uniqueKey = key.replace("${getUserKeyPrefix()}code_", "")
+                val timestamp = sharedPreferences.getLong("${getUserKeyPrefix()}timestamp_$uniqueKey", 0L)
+
+                if (timestamp != 0L) {
+                    // Получаем код элемента
+                    val code = value as String
+                    // Увеличиваем счетчик для данного кода
+                    groupedItems[code] = groupedItems.getOrDefault(code, 0) + 1
+                }
+            }
+        }
+
+        // Формируем список ScannedItemDisplay из сгруппированных данных
+        return groupedItems.map { (code, count) -> ScannedItemDisplay(code, count) }.toMutableList()
     }
 
     fun clearAllScannedItems() {
