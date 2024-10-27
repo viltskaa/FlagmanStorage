@@ -144,28 +144,4 @@ class PreferencesHelper(context: Context) {
                 Math.abs(y1 - y2) < tolerance
     }
 
-    // Метод для сохранения списка заказов Wildberries в кэш
-    fun saveItemsFromWB(items: MutableList<ItemFromWB>) {
-        val editor = sharedPreferences.edit()
-
-        // Преобразуем список объектов ArticleCount в JSON-строку
-        val gson = Gson()
-        val jsonItems = gson.toJson(items)
-
-        // Сохраняем JSON-строку в SharedPreferences
-        editor.putString("${getUserKeyPrefix()}wb_items", jsonItems)
-        editor.apply()
-    }
-
-    // Метод для извлечения списка объектов ArticleCount из кэша
-    fun getItemsFromWB(): MutableList<ItemFromWB> {
-        // Получаем JSON-строку из SharedPreferences
-        val jsonItems = sharedPreferences.getString("${getUserKeyPrefix()}wb_items", null) ?: return mutableListOf()
-
-        // Преобразуем JSON-строку обратно в список объектов ArticleCount
-        val gson = Gson()
-        val type = object : TypeToken<MutableList<ItemFromWB>>() {}.type
-
-        return gson.fromJson(jsonItems, type)
-    }
 }

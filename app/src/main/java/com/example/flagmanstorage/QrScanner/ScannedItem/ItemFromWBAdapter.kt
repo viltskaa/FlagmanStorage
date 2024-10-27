@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.flagmanstorage.QrScanner.PreferencesHelper
 import com.example.flagmanstorage.databinding.ActivityItemFromWbBinding
 
-class ItemFromWBAdapter(private var Items: MutableList<ItemFromWB>, private val preferencesHelper: PreferencesHelper) :
+class ItemFromWBAdapter(private var Items: MutableList<ItemFromWB>) :
     RecyclerView.Adapter<ItemFromWBAdapter.ItemFromWBViewHolder>() {
 
     inner class ItemFromWBViewHolder(private val binding: ActivityItemFromWbBinding) :
@@ -31,5 +31,11 @@ class ItemFromWBAdapter(private var Items: MutableList<ItemFromWB>, private val 
         Items.removeAt(position)
         notifyItemRemoved(position)
         notifyItemRangeChanged(position, Items.size)
+    }
+
+    fun updateItems(newItems: List<ItemFromWB>) {
+        Items.clear()
+        Items.addAll(newItems)
+        notifyDataSetChanged()  // Обновляем весь список
     }
 }
