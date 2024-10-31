@@ -61,7 +61,6 @@ class MainActivity : AppCompatActivity() {
 
         // Кнопка выхода
         binding.btnLogout.setOnClickListener {
-            userPreferences.clearUserName() // Очищаем данные пользователя
             userPreferences.logout()
             val intent = Intent(this, MainActivity2::class.java)
             startActivity(intent)

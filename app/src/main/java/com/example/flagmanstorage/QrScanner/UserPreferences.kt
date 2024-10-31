@@ -15,10 +15,6 @@ class UserPreferences(context: Context) {
         return prefs.getString("user_name", null)
     }
 
-    fun clearUserName() {
-        prefs.edit().remove("user_name").apply()
-    }
-
     fun saveLoginStatus(isLoggedIn: Boolean) {
         prefs.edit().putBoolean("is_logged_in", isLoggedIn).apply()
     }
@@ -29,7 +25,6 @@ class UserPreferences(context: Context) {
 
     // Выход из аккаунта
     fun logout() {
-        clearUserName()
-        saveLoginStatus(false)
+        prefs.edit().clear().apply()
     }
 }

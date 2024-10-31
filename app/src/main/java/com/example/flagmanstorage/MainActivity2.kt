@@ -55,6 +55,7 @@ class MainActivity2 : AppCompatActivity() {
         }
     }
 
+
     private fun setResult(scannedCode: String) {
         if (scannedCode.isNotEmpty()) {
             // Выводим значение "name" из QR-кода в Toast
