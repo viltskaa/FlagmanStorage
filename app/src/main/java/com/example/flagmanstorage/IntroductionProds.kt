@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.flagmanstorage.API.APIService
 import com.example.flagmanstorage.API.ApiClient
@@ -117,8 +118,9 @@ class IntroductionProds : AppCompatActivity() {
                 accelerometerValues[1],
                 accelerometerValues[2]
             )
-
-            if (preferencesHelper.isScannedItemExists(scannedItem.code, scannedItem.positionX, scannedItem.positionY, scannedItem.positionZ)) {
+            val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+            val switch = prefs.getBoolean("switch",true)
+            if (preferencesHelper.isScannedItemExists(scannedItem.code, scannedItem.positionX, scannedItem.positionY, scannedItem.positionZ) && switch) {
                 // Создаем диалоговое окно для подтверждения
                 val builder = AlertDialog.Builder(this)
                 builder.setTitle("Повторное добавление")

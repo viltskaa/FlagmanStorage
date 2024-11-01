@@ -32,7 +32,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
-
         initBinding()
         initViews()
 
@@ -46,6 +45,10 @@ class MainActivity : AppCompatActivity() {
         }
         binding.btnAddToShipping.setOnClickListener{
             val intent = Intent(this, ShipmentsProds::class.java)
+            startActivity(intent)
+        }
+        binding.btnSet.setOnClickListener {
+            val intent = Intent(this,SettingsActivity::class.java)
             startActivity(intent)
         }
     }
