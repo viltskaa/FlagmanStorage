@@ -22,25 +22,28 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:layout_weight="1"
+            android:layout_weight="2"
             android:text="Авторизован: "
             android:textSize="18sp"
             android:textColor="#fdfdfd" />
-        <Button
-            android:id="@+id/btn_set"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Настройки"
-            android:textColor="#ffffff"
-            android:backgroundTint="#201E28" />
 
-        <Button
-            android:id="@+id/btn_logout"
-            android:layout_width="wrap_content"
+        <ImageButton
+            android:id="@+id/btn_set"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Выйти"
-            android:textColor="#ffffff"
-            android:backgroundTint="#201E28" />
+            android:layout_weight="1"
+            android:src="@drawable/settings"
+            android:background="@android:color/transparent"
+            android:contentDescription="Настройки" />
+
+        <ImageButton
+            android:id="@+id/btn_logout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@drawable/exit"
+            android:background="@android:color/transparent"
+            android:contentDescription="Настройки" />
     </LinearLayout>
 
     <!-- Контейнер для кнопок, выровненных по центру -->

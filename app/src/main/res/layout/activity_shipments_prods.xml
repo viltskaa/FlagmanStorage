@@ -8,6 +8,14 @@
     android:background="#FAF3E0"
     tools:context=".ShipmentsProds">
 
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/productList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp"/>
+
     <Button
         android:id="@+id/button_scan"
         android:layout_width="wrap_content"
@@ -17,16 +25,9 @@
         android:text="Сканировать"
         android:textColor="@android:color/white"
         android:textSize="24sp"
-        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
         android:padding="10dp"
         android:elevation="4dp"
         android:background="@drawable/rounded_button"/>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/productList"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="16dp"/>
 
 </LinearLayout>
