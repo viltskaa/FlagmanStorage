@@ -15,6 +15,14 @@ class UserPreferences(context: Context) {
         return prefs.getString("user_name", null)
     }
 
+    fun saveToken(token: String) {
+        prefs.edit().putString("auth_token", token).apply()
+    }
+
+    fun getToken(): String? {
+        return prefs.getString("auth_token", null)
+    }
+
     fun saveLoginStatus(isLoggedIn: Boolean) {
         prefs.edit().putBoolean("is_logged_in", isLoggedIn).apply()
     }
@@ -25,6 +33,8 @@ class UserPreferences(context: Context) {
 
     // Выход из аккаунта
     fun logout() {
-        prefs.edit().clear().apply()
+        val editor = prefs.edit()
+        editor.clear() // Очищаем все данные
+        editor.apply() // Применяем изменения
     }
 }

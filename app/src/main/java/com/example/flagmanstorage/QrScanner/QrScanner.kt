@@ -7,7 +7,11 @@ import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
+import com.example.flagmanstorage.API.APIService
+import com.example.flagmanstorage.API.ApiClient
 import com.example.flagmanstorage.MainActivity
+import com.example.flagmanstorage.QrScanner.User.LoginRequest
+import com.example.flagmanstorage.QrScanner.User.LoginResponse
 import com.journeyapps.barcodescanner.ScanIntentResult
 
 import com.journeyapps.barcodescanner.ScanOptions
@@ -63,26 +67,19 @@ class QrScanner(
         }
     }
 
-    fun handleQrScanResult(result: ScanIntentResult, onJsonParsed: (String) -> Unit, onError: () -> Unit) {
+    fun handleQrScanResult(
+        result: ScanIntentResult,
+        onJsonParsed: (String) -> Unit,
+        onError: () -> Unit
+    ) {
         if (result.contents == null) {
             Toast.makeText(activity, "Сканирование отменено", Toast.LENGTH_SHORT).show()
         } else {
-            try {
-                // Предполагается, что результат содержимого QR-кода — это JSON строка
-                val jsonObject = JSONObject(result.contents)
-                val name = jsonObject.getString("name")
-                onJsonParsed(name) // Возвращаем значение "name"
-                UserPreferences(activity).saveUserName(name)
-                UserPreferences(activity).saveLoginStatus(true)
-                val intent = Intent(activity, MainActivity::class.java)
-                activity.startActivity(intent)
-                activity.finish()
-            } catch (e: JSONException) {
-                onError() // Возвращаем ошибку в случае некорректного JSON
-                Toast.makeText(activity, "Ошибка при разборе данных QR-кода", Toast.LENGTH_SHORT).show()
-            }
+            onJsonParsed(result.contents)
         }
     }
+
+
 }
 
 

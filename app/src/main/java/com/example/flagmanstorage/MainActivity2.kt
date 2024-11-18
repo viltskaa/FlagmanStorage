@@ -9,11 +9,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import com.example.flagmanstorage.API.APIService
 import com.example.flagmanstorage.API.ApiClient
 import com.example.flagmanstorage.QrScanner.QrScanner
+import com.example.flagmanstorage.QrScanner.User.LoginRequest
+import com.example.flagmanstorage.QrScanner.User.LoginResponse
 import com.example.flagmanstorage.QrScanner.UserPreferences
 import com.example.flagmanstorage.databinding.ActivityMain2Binding
 import com.example.flagmanstorage.databinding.ActivityMainBinding
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanIntentResult
+import org.json.JSONException
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -23,18 +27,22 @@ class MainActivity2 : AppCompatActivity() {
     private lateinit var binding: ActivityMain2Binding
     private lateinit var qrScanner: QrScanner
     private lateinit var userPreferences: UserPreferences
+
+    // Регистрация для обработки результата сканирования
     private val scanLauncher = registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
-        qrScanner.handleQrScanResult(result, { scannedCode ->
-            setResult(scannedCode)
-        }, {
-            // Обработка ошибки при разборе JSON
-            Toast.makeText(this, "Ошибка при разборе данных QR-кода", Toast.LENGTH_SHORT).show()
-        })
+        qrScanner.handleQrScanResult(result,
+            { scannedCode ->
+                handleScanResult(scannedCode)
+            },
+            {
+                Toast.makeText(this, "Ошибка при разборе данных QR-кода", Toast.LENGTH_SHORT).show()
+            })
     }
 
+    // Регистрация для запроса разрешений на камеру
     private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
         if (isGranted) {
-            qrScanner.showCameraForQrOnly()
+            qrScanner.showCameraForQrOnly() // Если разрешение получено, запускаем сканирование
         } else {
             Toast.makeText(this, "Требуется разрешение на использование камеры", Toast.LENGTH_SHORT).show()
         }
@@ -45,23 +53,66 @@ class MainActivity2 : AppCompatActivity() {
         initBinding()
         initViews()
 
-        // Создаем экземпляр QrScanner
+        // Инициализация экземпляра QrScanner
         qrScanner = QrScanner(this, scanLauncher, requestPermissionLauncher)
     }
 
     private fun initViews() {
         binding.buttonAuth.setOnClickListener {
-            qrScanner.checkCameraPermission { qrScanner.showCamera() }
+            qrScanner.checkCameraPermission {
+                qrScanner.showCameraForQrOnly() // Запускаем камеру для сканирования QR-кодов
+            }
         }
     }
 
-
-    private fun setResult(scannedCode: String) {
+    // Обработка результата сканирования
+    private fun handleScanResult(scannedCode: String) {
         if (scannedCode.isNotEmpty()) {
-            // Выводим значение "name" из QR-кода в Toast
-            Toast.makeText(this, scannedCode, Toast.LENGTH_SHORT).show()
+            // Преобразуем данные QR в объект и сохраняем в SharedPreferences
+            parseAndSaveUserData(scannedCode)
         } else {
             Toast.makeText(this, "Сканированный код пустой", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun parseAndSaveUserData(scannedCode: String) {
+        try {
+            val jsonObject = JSONObject(scannedCode)
+            val name = jsonObject.getString("name")
+            val surname = jsonObject.getString("surname")
+            val patronymic = jsonObject.getString("patronymic")
+
+            val loginRequest = LoginRequest(name, surname, patronymic)
+
+            val apiService = ApiClient.getClient().create(APIService::class.java)
+
+            apiService.login(loginRequest).enqueue(object : Callback<LoginResponse> {
+                override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+                    if (response.isSuccessful) {
+                        val loginResponse = response.body()
+                        loginResponse?.token?.let {
+                            userPreferences = UserPreferences(this@MainActivity2)
+                            userPreferences.saveUserName("$surname $name $patronymic")
+                            userPreferences.saveToken(it)
+                            userPreferences.saveLoginStatus(true)
+
+                            // Переходим на главную страницу
+                            startActivity(Intent(this@MainActivity2, MainActivity::class.java))
+                            finish()
+                        } ?: run {
+                            Toast.makeText(this@MainActivity2, "Ошибка при получении токена", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        Toast.makeText(this@MainActivity2, "Ошибка входа: ${response.message()}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                    Toast.makeText(this@MainActivity2, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+        } catch (e: JSONException) {
+            Toast.makeText(this, "Ошибка при разборе QR-кода", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -73,15 +124,12 @@ class MainActivity2 : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        // Проверка авторизации через UserPreferences
+        // Проверка состояния авторизации
         userPreferences = UserPreferences(this)
-        val isLoggedIn = userPreferences.isLoggedIn() // Предполагается, что вы добавили этот метод в UserPreferences
-
-        if (isLoggedIn) {
-            // Если пользователь авторизован, перенаправляем его на другую страницу
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish() // Закрываем текущую активность
+        if (userPreferences.isLoggedIn()) {
+            // Перенаправляем пользователя, если он уже авторизован
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
         }
     }
 }
