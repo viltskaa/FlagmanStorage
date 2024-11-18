@@ -26,7 +26,7 @@ class QrScanner(
     private val scanLauncher: ActivityResultLauncher<ScanOptions>,
     private val requestPermissionLauncher: ActivityResultLauncher<String>
 ) {
-
+    private var scanStartTime:Long = 0
     fun checkCameraPermission(onPermissionGranted: () -> Unit) {
         if (ContextCompat.checkSelfPermission(activity, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             onPermissionGranted()
@@ -37,6 +37,7 @@ class QrScanner(
         }
     }
     fun showCamera() {
+        scanStartTime = System.currentTimeMillis()
         val options = ScanOptions().apply {
             setDesiredBarcodeFormats(ScanOptions.EAN_13)
             setPrompt("Сканируйте QR-код")
@@ -48,6 +49,7 @@ class QrScanner(
         scanLauncher.launch(options)
     }
     fun showCameraForQrOnly() {
+        scanStartTime = System.currentTimeMillis()
         val options = ScanOptions().apply {
             setDesiredBarcodeFormats(ScanOptions.QR_CODE) // Устанавливаем только формат QR-кодов
             setPrompt("Сканируйте QR-код")
@@ -60,9 +62,12 @@ class QrScanner(
     }
 
     fun handleScanResult(result: ScanIntentResult, onScanSuccessful: (String) -> Unit) {
+        val scanEndTime = System.currentTimeMillis()
         if (result.contents == null) {
             Toast.makeText(activity, "Сканирование отменено", Toast.LENGTH_SHORT).show()
         } else {
+            val time = (scanEndTime-scanStartTime)/1000.0
+            Toast.makeText(activity, "Отсканировано за $time сек.", Toast.LENGTH_SHORT).show()
             onScanSuccessful(result.contents)
         }
     }
@@ -72,9 +77,12 @@ class QrScanner(
         onJsonParsed: (String) -> Unit,
         onError: () -> Unit
     ) {
+        val scanEndTime = System.currentTimeMillis()
         if (result.contents == null) {
             Toast.makeText(activity, "Сканирование отменено", Toast.LENGTH_SHORT).show()
         } else {
+            val time = (scanEndTime-scanStartTime)/1000.0
+            Toast.makeText(activity, "Отсканировано за $time сек.", Toast.LENGTH_SHORT).show()
             onJsonParsed(result.contents)
         }
     }
