@@ -25,6 +25,7 @@ import com.example.flagmanstorage.QrScanner.UserPreferences
 import com.example.flagmanstorage.databinding.ActivityIntroductionProdsBinding
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanIntentResult
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -39,7 +40,7 @@ class IntroductionProds : AppCompatActivity() {
     private lateinit var sensorManager: SensorManager
     private lateinit var accelerometer: Sensor
     private var accelerometerValues = FloatArray(3) // x, y, z координаты
-
+    private var isTorchOn = false
     private val scanLauncher = registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
         qrScanner.handleScanResult(result) { scannedCode ->
             processScannedCode(scannedCode)
@@ -155,7 +156,22 @@ class IntroductionProds : AppCompatActivity() {
         binding.buttonAdd.setOnClickListener {
             qrScanner.checkCameraPermission { qrScanner.showCamera() }
         }
+        binding.buttonOtchet.setOnClickListener {
+            val apiService = ApiClient.getClient().create(APIService::class.java)
+            apiService.report().enqueue(object : Callback<ResponseBody> {
+                override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                    if (response.isSuccessful) {
+                        Toast.makeText(this@IntroductionProds, "Список успешно отправлен!", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(this@IntroductionProds, "Response Code: ${response.code()}, Message: ${response.message()}", Toast.LENGTH_LONG).show()
+                    }
+                }
 
+                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                    Toast.makeText(this@IntroductionProds, "Ошибка соединения: ${t.message}", Toast.LENGTH_LONG).show()
+                }
+            })
+        }
         binding.buttonSend.setOnClickListener {
             val products = preferencesHelper.getScannedItems()
             if (products.isNotEmpty()) {

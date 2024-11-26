@@ -9,6 +9,19 @@
     android:background="#FAF3E0"
     tools:context=".IntroductionProds">
 
+    <Button
+        android:id="@+id/button_otchet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:backgroundTint="#FF6F61"
+        android:text="Отчет за смену"
+        android:textColor="@android:color/white"
+        android:textSize="24sp"
+        android:layout_marginTop="16dp"
+        android:padding="10dp"
+        android:elevation="4dp"
+        android:background="@drawable/rounded_button"/>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/productList"
         android:layout_width="match_parent"

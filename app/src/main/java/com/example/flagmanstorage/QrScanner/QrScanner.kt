@@ -44,6 +44,7 @@ class QrScanner(
             setCameraId(0)
             setBeepEnabled(false)
             setBarcodeImageEnabled(true)
+            setTorchEnabled(true)
             setOrientationLocked(false)
         }
         scanLauncher.launch(options)
