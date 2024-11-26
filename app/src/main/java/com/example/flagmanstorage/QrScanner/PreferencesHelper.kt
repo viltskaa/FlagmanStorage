@@ -42,15 +42,12 @@ class PreferencesHelper(context: Context) {
     }
 
     fun removeLastScannedItemByCode(code: String) {
-        // Получаем все отсканированные элементы из кэша
-        val scannedItems = getScannedItems() // Метод, который возвращает все отсканированные элементы
+        val scannedItems = getScannedItems()
 
-        // Находим последний добавленный элемент с заданным кодом
         val lastItem = scannedItems
             .filter { it.code == code }
-            .maxByOrNull { it.timestamp } // Находим элемент с максимальным timestamp
+            .maxByOrNull { it.timestamp }
 
-        // Если такой элемент найден, удаляем его
         lastItem?.let {
             val uniqueKey = "${it.code}_${it.timestamp}"
             val editor = sharedPreferences.edit()

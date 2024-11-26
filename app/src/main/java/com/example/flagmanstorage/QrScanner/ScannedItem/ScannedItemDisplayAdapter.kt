@@ -20,6 +20,7 @@ class ScannedItemDisplayAdapter(private var scannedItems: MutableList<ScannedIte
                 {
                     removeItem(adapterPosition)
                 }
+                updateScannedItems()
             }
         }
     }
@@ -38,5 +39,11 @@ class ScannedItemDisplayAdapter(private var scannedItems: MutableList<ScannedIte
         scannedItems.removeAt(position)  // Удаляем элемент из списка
         notifyItemRemoved(position)      // Уведомляем адаптер об удалении элемента
         notifyItemRangeChanged(position, scannedItems.size)  // Обновляем оставшиеся элементы
+    }
+
+    fun updateScannedItems() {
+        scannedItems.clear()
+        scannedItems.addAll(preferencesHelper.getGroupedScannedItems())  // Обновляем данные из SharedPreferences
+        notifyDataSetChanged()  // Уведомляем адаптер об изменении данных
     }
 }
