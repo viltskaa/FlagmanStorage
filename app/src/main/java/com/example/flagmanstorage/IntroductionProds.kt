@@ -112,8 +112,9 @@ class IntroductionProds : AppCompatActivity() {
     @SuppressLint("NotifyDataSetChanged")
     private fun processScannedCode(scannedCode: String) {
         if (scannedCode.isNotEmpty()) {
+            val code = scannedCode.splitToSequence(",").first()
             val scannedItem = ScannedItem(
-                scannedCode,
+                code.drop(4),
                 System.currentTimeMillis(),
                 accelerometerValues[0],
                 accelerometerValues[1],
