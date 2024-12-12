@@ -119,7 +119,7 @@ class PreferencesHelper(context: Context) {
         editor.apply()
     }
 
-    fun isScannedItemExists(scannedCode: String, positionX: Float, positionY: Float, positionZ: Float): Boolean {
+    fun isScannedItemExists(scannedCode: String, timestamp: Long, positionX: Float, positionY: Float, positionZ: Float): Boolean {
         val allEntries = sharedPreferences.all
         for ((key, value) in allEntries) {
             if (key.startsWith("${getUserKeyPrefix()}code_") && value == scannedCode) {
@@ -130,6 +130,9 @@ class PreferencesHelper(context: Context) {
                 if (isPositionSimilar(savedX, savedY, savedZ, positionX, positionY, positionZ)) {
                     return true
                 }
+            }
+            if (key.startsWith("${getUserKeyPrefix()}timestamp_") && value == timestamp) {
+                return true
             }
         }
         return false

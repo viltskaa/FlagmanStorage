@@ -71,16 +71,16 @@
             android:id="@+id/btn_add_to_shipping"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Внесение товара на отгрузку"
-            android:textSize="18sp"
-            android:backgroundTint="#A361FF"
-            android:textColor="@android:color/white"
             android:layout_marginBottom="16dp"
+            android:background="@drawable/rounded_button"
+            android:backgroundTint="#A361FF"
+            android:clickable="true"
             android:elevation="4dp"
-            android:enabled="false"
-            android:clickable="false"
+            android:enabled="true"
             android:padding="12dp"
-            android:background="@drawable/rounded_button"/>
+            android:text="Внесение товара на отгрузку"
+            android:textColor="@android:color/white"
+            android:textSize="18sp" />
 
         <Button
             android:id="@+id/btn_repack"

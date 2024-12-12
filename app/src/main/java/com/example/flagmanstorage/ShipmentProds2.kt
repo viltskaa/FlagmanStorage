@@ -7,31 +7,29 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.flagmanstorage.API.APIService
 import com.example.flagmanstorage.API.ApiClient
+import com.example.flagmanstorage.databinding.ActivityIntroductionProdsBinding
 import com.example.flagmanstorage.QrScanner.PreferencesHelper
 import com.example.flagmanstorage.QrScanner.QrScanner
-import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItem
-import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItemAdapter
-import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItemDisplayAdapter
 import com.example.flagmanstorage.QrScanner.UserPreferences
-import com.example.flagmanstorage.databinding.ActivityIntroductionProdsBinding
+import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItem
+import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItemDisplayAdapter
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanIntentResult
-import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class IntroductionProds : AppCompatActivity() {
-
+class ShipmentProds2: AppCompatActivity() {
     private lateinit var binding: ActivityIntroductionProdsBinding
     private lateinit var qrScanner: QrScanner
     private lateinit var preferencesHelper: PreferencesHelper
@@ -41,6 +39,9 @@ class IntroductionProds : AppCompatActivity() {
     private lateinit var accelerometer: Sensor
     private var accelerometerValues = FloatArray(3) // x, y, z координаты
     private var isTorchOn = false
+
+    private var buffer: String = ""
+
     private val scanLauncher = registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
         qrScanner.handleScanResult(result) { scannedCode ->
             processScannedCode(scannedCode)
@@ -85,6 +86,24 @@ class IntroductionProds : AppCompatActivity() {
         }.start()
     }
 
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == 4) {
+            return super.onKeyUp(keyCode, event)
+        }
+
+        return if (keyCode == KeyEvent.KEYCODE_ENTER) {
+            processScannedCode(buffer);
+            buffer = "";
+            true
+        } else {
+            event?.let {
+                buffer += it.unicodeChar.toChar();
+            }
+
+            super.onKeyUp(keyCode, event)
+        }
+    }
+
     private val sensorEventListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
             if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
@@ -95,7 +114,7 @@ class IntroductionProds : AppCompatActivity() {
         }
 
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-            // Не требуется
+            throw NotImplementedError()
         }
     }
 
@@ -113,10 +132,11 @@ class IntroductionProds : AppCompatActivity() {
     private fun processScannedCode(scannedCode: String) {
         if (scannedCode.isNotEmpty()) {
             val code = scannedCode.splitToSequence(",").first()
-            val timestamp = scannedCode.splitToSequence(",").last().toLong()
+            val timestamp = scannedCode.splitToSequence(",")
+                .last().drop(4).toLong() * 1000
             val scannedItem = ScannedItem(
                 code.drop(4),
-                System.currentTimeMillis(),
+                timestamp,
                 accelerometerValues[0],
                 accelerometerValues[1],
                 accelerometerValues[2]
@@ -158,46 +178,39 @@ class IntroductionProds : AppCompatActivity() {
         binding.buttonAdd.setOnClickListener {
             qrScanner.checkCameraPermission { qrScanner.showCamera() }
         }
-//        binding.buttonOtchet.setOnClickListener {
-//            val apiService = ApiClient.getClient().create(APIService::class.java)
-//            apiService.report().enqueue(object : Callback<ResponseBody> {
-//                override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-//                    if (response.isSuccessful) {
-//                        Toast.makeText(this@IntroductionProds, "Список успешно отправлен!", Toast.LENGTH_LONG).show()
-//                    } else {
-//                        Toast.makeText(this@IntroductionProds, "Response Code: ${response.code()}, Message: ${response.message()}", Toast.LENGTH_LONG).show()
-//                    }
-//                }
-//
-//                override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-//                    Toast.makeText(this@IntroductionProds, "Ошибка соединения: ${t.message}", Toast.LENGTH_LONG).show()
-//                }
-//            })
-//        }
         binding.buttonSend.setOnClickListener {
-            val products = preferencesHelper.getScannedItems()
-            if (products.isNotEmpty()) {
-                // Инициализация Retrofit
-                val apiService = ApiClient.getClient().create(APIService::class.java)
-                val call = apiService.sendListCodeTime(products)
-                call.enqueue(object : Callback<Void> {
-                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                        if (response.isSuccessful) {
-                            Toast.makeText(this@IntroductionProds, "Список успешно отправлен!", Toast.LENGTH_LONG).show()
-                        } else {
-                            Toast.makeText(this@IntroductionProds, "Response Code: ${response.code()}, Message: ${response.message()}", Toast.LENGTH_LONG).show()
-                        }
-                    }
-
-                    override fun onFailure(call: Call<Void>, t: Throwable) {
-                        Toast.makeText(this@IntroductionProds, "Ошибка соединения: ${t.message}", Toast.LENGTH_LONG).show()
-                    }
-                })
-            } else {
-                Toast.makeText(this, "Список пуст, заполните его", Toast.LENGTH_SHORT).show()
-            }
-            preferencesHelper.clearAllScannedItems()
-            updateProductList()
+//            val products = preferencesHelper.getScannedItems()
+//            if (products.isNotEmpty()) {
+//                val apiService = ApiClient.getClient().create(APIService::class.java)
+//                val call = apiService.updateByArticle(products)
+//
+//                call.enqueue(object : Callback<Void> {
+//                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
+//                        if (response.isSuccessful) {
+//                            Toast.makeText(
+//                                this@ShipmentProds2,
+//                                "Код успешно отправлен на сервер",
+//                                Toast.LENGTH_SHORT
+//                            ).show()
+//                        } else {
+//                            Toast.makeText(
+//                                this@ShipmentProds2,
+//                                "Ошибка отправки кода: ${response.code()} ${response.message()}",
+//                                Toast.LENGTH_SHORT
+//                            ).show()
+//                        }
+//                    }
+//
+//                    override fun onFailure(call: Call<Void>, t: Throwable) {
+//                        Toast.makeText(this@ShipmentProds2, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT)
+//                            .show()
+//                    }
+//                })
+//            } else {
+//                Toast.makeText(this, "Список пуст, заполните его", Toast.LENGTH_SHORT).show()
+//            }
+//            preferencesHelper.clearAllScannedItems()
+//            updateProductList()
         }
     }
 
@@ -212,5 +225,3 @@ class IntroductionProds : AppCompatActivity() {
         setContentView(binding.root)
     }
 }
-
-

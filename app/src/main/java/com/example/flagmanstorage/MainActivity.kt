@@ -1,21 +1,9 @@
 package com.example.flagmanstorage
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import com.example.flagmanstorage.API.APIService
-import com.example.flagmanstorage.API.ApiClient
-import com.example.flagmanstorage.QrScanner.QrScanner
 import com.example.flagmanstorage.QrScanner.UserPreferences
 import com.example.flagmanstorage.databinding.ActivityMainBinding
-
-import com.journeyapps.barcodescanner.ScanContract
-import com.journeyapps.barcodescanner.ScanIntentResult
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -44,7 +32,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         binding.btnAddToShipping.setOnClickListener{
-            val intent = Intent(this, ShipmentsProds::class.java)
+            val intent = Intent(this, ShipmentProds2::class.java)
             startActivity(intent)
         }
         binding.btnSet.setOnClickListener {

@@ -34,7 +34,7 @@
             android:name=".itemFromWb"
             android:exported="false" />
         <activity
-            android:name=".ShipmentsProds"
+            android:name=".ShipmentProds2"
             android:exported="false" />
         <activity
             android:name=".MainActivity2"
