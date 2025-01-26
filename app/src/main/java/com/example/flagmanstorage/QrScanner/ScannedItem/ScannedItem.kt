@@ -5,5 +5,6 @@ data class ScannedItem(
     val timestamp: Long,
     val positionX: Float,
     val positionY: Float,
-    val positionZ: Float
+    val positionZ: Float,
+    val qrcode: String
 )

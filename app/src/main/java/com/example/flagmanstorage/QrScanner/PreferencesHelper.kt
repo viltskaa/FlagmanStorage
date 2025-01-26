@@ -25,9 +25,9 @@ class PreferencesHelper(context: Context) {
         editor.putFloat("${getUserKeyPrefix()}posX_$uniqueKey", item.positionX)
         editor.putFloat("${getUserKeyPrefix()}posY_$uniqueKey", item.positionY)
         editor.putFloat("${getUserKeyPrefix()}posZ_$uniqueKey", item.positionZ)
+        editor.putString("${getUserKeyPrefix()}qrcode_$uniqueKey", item.qrcode)
         editor.apply()
     }
-
 
     fun removeScannedItem(item: ScannedItem) {
         val uniqueKey = "${item.code}_${item.timestamp}"
@@ -73,8 +73,9 @@ class PreferencesHelper(context: Context) {
                 val positionX = sharedPreferences.getFloat("${getUserKeyPrefix()}posX_$uniqueKey", 0f)
                 val positionY = sharedPreferences.getFloat("${getUserKeyPrefix()}posY_$uniqueKey", 0f)
                 val positionZ = sharedPreferences.getFloat("${getUserKeyPrefix()}posZ_$uniqueKey", 0f)
-                if (timestamp != 0L) {
-                    items.add(ScannedItem(value, timestamp, positionX, positionY, positionZ))
+                val qrcode = sharedPreferences.getString("${getUserKeyPrefix()}qrcode_$uniqueKey", "")
+                if (timestamp != 0L && qrcode != null) {
+                    items.add(ScannedItem(value, timestamp, positionX, positionY, positionZ,  qrcode))
                 }
             }
         }
@@ -103,7 +104,10 @@ class PreferencesHelper(context: Context) {
         }
 
         // Формируем список ScannedItemDisplay из сгруппированных данных
-        return groupedItems.map { (code, count) -> ScannedItemDisplay(code, count) }.toMutableList()
+        return groupedItems
+            .map { (code, count) -> ScannedItemDisplay(code, count) }
+            .sortedByDescending { it.code }
+            .toMutableList()
     }
 
     fun clearAllScannedItems() {
@@ -119,18 +123,9 @@ class PreferencesHelper(context: Context) {
         editor.apply()
     }
 
-    fun isScannedItemExists(scannedCode: String, timestamp: Long, positionX: Float, positionY: Float, positionZ: Float): Boolean {
+    fun isScannedItemExists(timestamp: Long): Boolean {
         val allEntries = sharedPreferences.all
         for ((key, value) in allEntries) {
-            if (key.startsWith("${getUserKeyPrefix()}code_") && value == scannedCode) {
-                val uniqueKey = key.replace("${getUserKeyPrefix()}code_", "")
-                val savedX = sharedPreferences.getFloat("${getUserKeyPrefix()}posX_$uniqueKey", 0f)
-                val savedY = sharedPreferences.getFloat("${getUserKeyPrefix()}posY_$uniqueKey", 0f)
-                val savedZ = sharedPreferences.getFloat("${getUserKeyPrefix()}posZ_$uniqueKey", 0f)
-                if (isPositionSimilar(savedX, savedY, savedZ, positionX, positionY, positionZ)) {
-                    return true
-                }
-            }
             if (key.startsWith("${getUserKeyPrefix()}timestamp_") && value == timestamp) {
                 return true
             }

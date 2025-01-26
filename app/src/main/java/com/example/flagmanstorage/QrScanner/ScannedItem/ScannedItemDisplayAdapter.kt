@@ -6,18 +6,20 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.flagmanstorage.QrScanner.PreferencesHelper
 import com.example.flagmanstorage.databinding.ActivityItemScannedBinding
 
-class ScannedItemDisplayAdapter(private var scannedItems: MutableList<ScannedItemDisplay>, private val preferencesHelper: PreferencesHelper) :
+class ScannedItemDisplayAdapter(
+    private var scannedItems: MutableList<ScannedItemDisplay>,
+    private val preferencesHelper: PreferencesHelper
+) :
     RecyclerView.Adapter<ScannedItemDisplayAdapter.ScannedItemViewHolder>() {
 
     inner class ScannedItemViewHolder(private val binding: ActivityItemScannedBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(scannedItem: ScannedItemDisplay) {
             binding.textViewCode.text = scannedItem.code
-            binding.textCords.text=scannedItem.count.toString()
+            binding.textCords.text = scannedItem.count.toString()
             binding.buttonAction.setOnClickListener {
                 preferencesHelper.removeLastScannedItemByCode(scannedItem.code)
-                if(scannedItem.count==1)
-                {
+                if (scannedItem.count == 1) {
                     removeItem(adapterPosition)
                 }
                 updateScannedItems()
@@ -26,7 +28,8 @@ class ScannedItemDisplayAdapter(private var scannedItems: MutableList<ScannedIte
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScannedItemViewHolder {
-        val binding = ActivityItemScannedBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding =
+            ActivityItemScannedBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ScannedItemViewHolder(binding)
     }
 

@@ -1,11 +1,11 @@
 package com.example.flagmanstorage
 
 import android.content.Intent
-import android.content.SharedPreferences
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import com.example.flagmanstorage.API.APIService
 import com.example.flagmanstorage.API.ApiClient
 import com.example.flagmanstorage.QrScanner.QrScanner
@@ -13,20 +13,19 @@ import com.example.flagmanstorage.QrScanner.User.LoginRequest
 import com.example.flagmanstorage.QrScanner.User.LoginResponse
 import com.example.flagmanstorage.QrScanner.UserPreferences
 import com.example.flagmanstorage.databinding.ActivityMain2Binding
-import com.example.flagmanstorage.databinding.ActivityMainBinding
+import com.example.flagmanstorage.utils.TwoDimScannerActivity
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanIntentResult
 import org.json.JSONException
-import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class MainActivity2 : AppCompatActivity() {
-
+class MainActivity2 : TwoDimScannerActivity() {
     private lateinit var binding: ActivityMain2Binding
     private lateinit var qrScanner: QrScanner
     private lateinit var userPreferences: UserPreferences
+    private var buffer: String = ""
 
     // Регистрация для обработки результата сканирования
     private val scanLauncher = registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
@@ -55,13 +54,12 @@ class MainActivity2 : AppCompatActivity() {
 
         // Инициализация экземпляра QrScanner
         qrScanner = QrScanner(this, scanLauncher, requestPermissionLauncher)
+        super.setCallbackAfterScan(::handleScanResult)
     }
 
     private fun initViews() {
         binding.buttonAuth.setOnClickListener {
-            qrScanner.checkCameraPermission {
-                qrScanner.showCameraForQrOnly() // Запускаем камеру для сканирования QR-кодов
-            }
+            handleScanResult("test,test,test")
         }
     }
 
@@ -77,10 +75,15 @@ class MainActivity2 : AppCompatActivity() {
 
     private fun parseAndSaveUserData(scannedCode: String) {
         try {
-            val jsonObject = JSONObject(scannedCode)
-            val name = jsonObject.getString("name")
-            val surname = jsonObject.getString("surname")
-            val patronymic = jsonObject.getString("patronymic")
+            val values = scannedCode.split(",")
+            if (values.count() != 3) {
+                Toast.makeText(this, "Ошибка при разборе QR-кода", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            val name = values[0]
+            val surname = values[1]
+            val patronymic = values[2]
 
             val loginRequest = LoginRequest(name, surname, patronymic)
 

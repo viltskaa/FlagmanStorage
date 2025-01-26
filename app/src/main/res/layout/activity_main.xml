@@ -86,14 +86,14 @@
             android:id="@+id/btn_repack"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Переупаковка"
-            android:textSize="18sp"
+            android:background="@drawable/rounded_button"
             android:backgroundTint="#A361FF"
-            android:textColor="@android:color/white"
+            android:clickable="true"
             android:elevation="4dp"
-            android:enabled="false"
-            android:clickable="false"
+            android:enabled="true"
             android:padding="12dp"
-            android:background="@drawable/rounded_button"/>
+            android:text="Списание"
+            android:textColor="@android:color/white"
+            android:textSize="18sp" />
     </LinearLayout>
 </LinearLayout>

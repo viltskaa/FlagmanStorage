@@ -35,6 +35,10 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, ShipmentProds2::class.java)
             startActivity(intent)
         }
+        binding.btnRepack.setOnClickListener{
+            val intent = Intent(this, WriteOffActivity::class.java)
+            startActivity(intent)
+        }
         binding.btnSet.setOnClickListener {
             val intent = Intent(this,SettingsActivity::class.java)
             startActivity(intent)

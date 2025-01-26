@@ -17,6 +17,7 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.flagmanstorage.API.APIService
 import com.example.flagmanstorage.API.ApiClient
+import com.example.flagmanstorage.API.Product
 import com.example.flagmanstorage.databinding.ActivityIntroductionProdsBinding
 import com.example.flagmanstorage.QrScanner.PreferencesHelper
 import com.example.flagmanstorage.QrScanner.QrScanner
@@ -29,7 +30,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class ShipmentProds2: AppCompatActivity() {
+class ShipmentProds2 : AppCompatActivity() {
     private lateinit var binding: ActivityIntroductionProdsBinding
     private lateinit var qrScanner: QrScanner
     private lateinit var preferencesHelper: PreferencesHelper
@@ -42,19 +43,25 @@ class ShipmentProds2: AppCompatActivity() {
 
     private var buffer: String = ""
 
-    private val scanLauncher = registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
-        qrScanner.handleScanResult(result) { scannedCode ->
-            processScannedCode(scannedCode)
+    private val scanLauncher =
+        registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
+            qrScanner.handleScanResult(result) { scannedCode ->
+                processScannedCode(scannedCode)
+            }
         }
-    }
 
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-        if (isGranted) {
-            qrScanner.showCamera()
-        } else {
-            Toast.makeText(this, "Требуется разрешение на использование камеры", Toast.LENGTH_SHORT).show()
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                qrScanner.showCamera()
+            } else {
+                Toast.makeText(
+                    this,
+                    "Требуется разрешение на использование камеры",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -114,13 +121,17 @@ class ShipmentProds2: AppCompatActivity() {
         }
 
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-            throw NotImplementedError()
+
         }
     }
 
     override fun onResume() {
         super.onResume()
-        sensorManager.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
+        sensorManager.registerListener(
+            sensorEventListener,
+            accelerometer,
+            SensorManager.SENSOR_DELAY_NORMAL
+        )
     }
 
     override fun onPause() {
@@ -130,7 +141,10 @@ class ShipmentProds2: AppCompatActivity() {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun processScannedCode(scannedCode: String) {
-        if (scannedCode.isNotEmpty()) {
+        if (scannedCode.isNotEmpty()
+            && scannedCode.contains(",")
+            && scannedCode.contains("gtin")
+            && scannedCode.contains("time")) {
             val code = scannedCode.splitToSequence(",").first()
             val timestamp = scannedCode.splitToSequence(",")
                 .last().drop(4).toLong() * 1000
@@ -139,32 +153,10 @@ class ShipmentProds2: AppCompatActivity() {
                 timestamp,
                 accelerometerValues[0],
                 accelerometerValues[1],
-                accelerometerValues[2]
+                accelerometerValues[2],
+                scannedCode
             )
-            val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-            val switch = prefs.getBoolean("switch",true)
-            if (preferencesHelper.isScannedItemExists(scannedItem.code, timestamp, scannedItem.positionX, scannedItem.positionY, scannedItem.positionZ) && switch) {
-                // Создаем диалоговое окно для подтверждения
-                val builder = AlertDialog.Builder(this)
-                builder.setTitle("Повторное добавление")
-                builder.setMessage("Кажется, этот код уже был добавлен. Вы уверены, что хотите добавить его снова?")
-
-                // Если пользователь выбрал "Да"
-                builder.setPositiveButton("Да") { dialog, which ->
-                    preferencesHelper.saveScannedItem(scannedItem)
-                    adapter.notifyDataSetChanged()
-                    updateProductList()
-                }
-
-                // Если пользователь выбрал "Нет"
-                builder.setNegativeButton("Нет") { dialog, which ->
-                    dialog.dismiss()
-                }
-
-                // Показываем диалог
-                builder.show()
-            } else {
-                // Если элемент не существует, добавляем его без подтверждения
+            if (!preferencesHelper.isScannedItemExists(timestamp)) {
                 preferencesHelper.saveScannedItem(scannedItem)
                 adapter.notifyDataSetChanged()
                 updateProductList()
@@ -179,44 +171,50 @@ class ShipmentProds2: AppCompatActivity() {
             qrScanner.checkCameraPermission { qrScanner.showCamera() }
         }
         binding.buttonSend.setOnClickListener {
-//            val products = preferencesHelper.getScannedItems()
-//            if (products.isNotEmpty()) {
-//                val apiService = ApiClient.getClient().create(APIService::class.java)
-//                val call = apiService.updateByArticle(products)
-//
-//                call.enqueue(object : Callback<Void> {
-//                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
-//                        if (response.isSuccessful) {
-//                            Toast.makeText(
-//                                this@ShipmentProds2,
-//                                "Код успешно отправлен на сервер",
-//                                Toast.LENGTH_SHORT
-//                            ).show()
-//                        } else {
-//                            Toast.makeText(
-//                                this@ShipmentProds2,
-//                                "Ошибка отправки кода: ${response.code()} ${response.message()}",
-//                                Toast.LENGTH_SHORT
-//                            ).show()
-//                        }
-//                    }
-//
-//                    override fun onFailure(call: Call<Void>, t: Throwable) {
-//                        Toast.makeText(this@ShipmentProds2, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT)
-//                            .show()
-//                    }
-//                })
-//            } else {
-//                Toast.makeText(this, "Список пуст, заполните его", Toast.LENGTH_SHORT).show()
-//            }
-//            preferencesHelper.clearAllScannedItems()
-//            updateProductList()
+            val products = preferencesHelper.getScannedItems()
+            if (products.isNotEmpty()) {
+                val apiService = ApiClient.getClient().create(APIService::class.java)
+                val call = apiService.sendShipment(products.map { Product(it.qrcode) })
+
+                call.enqueue(object : Callback<Void> {
+                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                        if (response.isSuccessful) {
+                            Toast.makeText(
+                                this@ShipmentProds2,
+                                "Код успешно отправлен на сервер",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            Toast.makeText(
+                                this@ShipmentProds2,
+                                "Ошибка отправки кода: ${response.code()} ${response.message()}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+
+                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                        Toast.makeText(
+                            this@ShipmentProds2,
+                            "Ошибка сети: ${t.message}",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                    }
+                })
+            } else {
+                Toast.makeText(this, "Список пуст, заполните его", Toast.LENGTH_SHORT).show()
+            }
+            preferencesHelper.clearAllScannedItems()
+            updateProductList()
         }
     }
 
     private fun updateProductList() {
-        val products = preferencesHelper.getGroupedScannedItems() // Получаем обновленный список продуктов
-        val adapter = ScannedItemDisplayAdapter(products, preferencesHelper) // Создаем новый адаптер
+        val products =
+            preferencesHelper.getGroupedScannedItems() // Получаем обновленный список продуктов
+        val adapter =
+            ScannedItemDisplayAdapter(products, preferencesHelper) // Создаем новый адаптер
         binding.productList.adapter = adapter // Устанавливаем адаптер в RecyclerView
     }
 

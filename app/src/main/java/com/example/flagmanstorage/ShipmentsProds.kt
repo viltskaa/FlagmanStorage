@@ -101,24 +101,24 @@ class ShipmentsProds : AppCompatActivity() {
         })
     }
     private fun sendScannedCodeToServer(article: String) {
-        val apiService = ApiClient.getClient().create(APIService::class.java)
-        val call = apiService.updateByArticle(article)
-
-        call.enqueue(object : Callback<Void> {
-            override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                if (response.isSuccessful) {
-                    Toast.makeText(this@ShipmentsProds, "Код успешно отправлен на сервер", Toast.LENGTH_SHORT).show()
-                    // Загружаем обновленный список элементов с сервера только после успешного обновления
-                    fetchItemsFromServer("false")
-                } else {
-                    Toast.makeText(this@ShipmentsProds, "Ошибка отправки кода: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onFailure(call: Call<Void>, t: Throwable) {
-                Toast.makeText(this@ShipmentsProds, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
+//        val apiService = ApiClient.getClient().create(APIService::class.java)
+//        val call = apiService.updateByArticle(article)
+//
+//        call.enqueue(object : Callback<Void> {
+//            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+//                if (response.isSuccessful) {
+//                    Toast.makeText(this@ShipmentsProds, "Код успешно отправлен на сервер", Toast.LENGTH_SHORT).show()
+//                    // Загружаем обновленный список элементов с сервера только после успешного обновления
+//                    fetchItemsFromServer("false")
+//                } else {
+//                    Toast.makeText(this@ShipmentsProds, "Ошибка отправки кода: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+//                }
+//            }
+//
+//            override fun onFailure(call: Call<Void>, t: Throwable) {
+//                Toast.makeText(this@ShipmentsProds, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT).show()
+//            }
+//        })
     }
     private fun initBinding() {
         binding = ActivityShipmentsProdsBinding.inflate(layoutInflater)
