@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         binding.btnAddToShipping.setOnClickListener{
-            val intent = Intent(this, ShipmentProds2::class.java)
+            val intent = Intent(this, ShipmentsProds::class.java)
             startActivity(intent)
         }
         binding.btnRepack.setOnClickListener{

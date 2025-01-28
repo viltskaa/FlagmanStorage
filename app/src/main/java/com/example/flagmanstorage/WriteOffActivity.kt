@@ -71,7 +71,9 @@ class WriteOffActivity: AppCompatActivity() {
             startActivity(intent)
             finish()
         }
-
+        binding.root.isFocusable = true
+        binding.root.isFocusableInTouchMode = true
+        binding.root.requestFocus()
         qrScanner = QrScanner(this, scanLauncher, requestPermissionLauncher)
 
         initViews()

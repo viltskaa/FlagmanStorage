@@ -35,7 +35,7 @@
             android:name=".itemFromWb"
             android:exported="false" />
         <activity
-            android:name=".ShipmentProds2"
+            android:name=".ShipmentsProds"
             android:exported="false" />
         <activity
             android:name=".WriteOffActivity"

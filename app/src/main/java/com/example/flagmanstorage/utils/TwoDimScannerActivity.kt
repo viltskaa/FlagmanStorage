@@ -12,22 +12,22 @@ abstract class TwoDimScannerActivity : AppCompatActivity() {
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == 4) {
-            // Back button code
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             return super.onKeyUp(keyCode, event)
         }
 
-        return if (keyCode == KeyEvent.KEYCODE_ENTER) {
-            if (callbackAfterScan != null) {
-                callbackAfterScan?.let { it(buffer) }
-            } else {
-                throw NotImplementedError("callbackAfterScan isn't present!, use setCallbackAfterScan")
-            }
-            buffer = ""
-            true
-        } else {
-            event?.let { buffer += it.unicodeChar.toChar() }
-            super.onKeyUp(keyCode, event)
+        if (event != null && keyCode != KeyEvent.KEYCODE_ENTER) {
+            buffer += event.unicodeChar.toChar()
         }
+
+        if (keyCode == KeyEvent.KEYCODE_ENTER) {
+            callbackAfterScan?.let {
+                it(buffer) // Передаем результат в callback
+            } ?: throw NotImplementedError("callbackAfterScan isn't set! Use setCallbackAfterScan.")
+            buffer = "" // Очищаем буфер
+            return true // Возвращаем true, чтобы остановить дальнейшую обработку Enter
+        }
+
+        return super.onKeyUp(keyCode, event)
     }
 }

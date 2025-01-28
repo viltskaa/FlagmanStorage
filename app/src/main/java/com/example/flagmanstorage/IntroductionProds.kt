@@ -60,7 +60,9 @@ class IntroductionProds : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         initBinding()
         userPreferences = UserPreferences(this)
-
+        binding.root.isFocusable = true
+        binding.root.isFocusableInTouchMode = true
+        binding.root.requestFocus()
         if (!userPreferences.isLoggedIn()) {
             val intent = Intent(this, MainActivity2::class.java)
             startActivity(intent)

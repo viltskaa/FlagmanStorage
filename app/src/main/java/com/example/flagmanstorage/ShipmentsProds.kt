@@ -3,6 +3,7 @@ package com.example.flagmanstorage
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -10,22 +11,27 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.flagmanstorage.API.APIService
 import com.example.flagmanstorage.API.ApiClient
+import com.example.flagmanstorage.API.ShipmentItemsStatusResponse
+import com.example.flagmanstorage.API.UpdateRequest
 import com.example.flagmanstorage.QrScanner.PreferencesHelper
 import com.example.flagmanstorage.QrScanner.QrScanner
 import com.example.flagmanstorage.QrScanner.ScannedItem.ItemFromWB
 import com.example.flagmanstorage.QrScanner.ScannedItem.ItemFromWBAdapter
 import com.example.flagmanstorage.databinding.ActivityShipmentsProdsBinding
+import com.example.flagmanstorage.utils.TwoDimScannerActivity
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanIntentResult
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class ShipmentsProds : AppCompatActivity() {
+class ShipmentsProds : TwoDimScannerActivity() {
 
     private lateinit var binding: ActivityShipmentsProdsBinding // Замените на соответствующий класс привязки
     private lateinit var qrScanner: QrScanner
     private lateinit var itemAdapter: ItemFromWBAdapter
+    private lateinit var buttonSuccess: Button
+    private var buffer: String = ""
     private val scanLauncher = registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
         qrScanner.handleScanResult(result) { scannedCode ->
             processScannedCode(scannedCode)
@@ -44,82 +50,156 @@ class ShipmentsProds : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         initBinding()
         Log.d("ShipmentsProds", "Заход на страницу ShipmentsProds")
-        // Инициализация qrScanner после инициализации binding
         qrScanner = QrScanner(this, scanLauncher, requestPermissionLauncher)
-
-        initViews() // Инициализация кнопок и других элементов интерфейса
-
-        // Инициализация RecyclerView
-        val recyclerView = findViewById<RecyclerView>(R.id.productList) // Замените на ID вашего RecyclerView
+        buttonSuccess = findViewById(R.id.button_ship)
+        binding.root.isFocusable = true
+        binding.root.isFocusableInTouchMode = true
+        binding.root.requestFocus()
+        initViews()
+        super.setCallbackAfterScan(::handleScanResult)
+        val recyclerView = findViewById<RecyclerView>(R.id.productList)
         itemAdapter = ItemFromWBAdapter(mutableListOf())
         recyclerView.adapter = itemAdapter
         recyclerView.layoutManager = LinearLayoutManager(this)
-
-        fetchItemsFromServer("true") // Загрузка данных с сервера
+        itemAdapter.onActionClickListener = { product ->
+            outOfStock(product.id)
+        }
+        fetchItemsFromServer()
     }
 
     private fun initViews() {
         binding.buttonScan.setOnClickListener {
             qrScanner.checkCameraPermission { qrScanner.showCamera() }
         }
+        binding.buttonShip.setOnClickListener {
+            shipping()
+        }
     }
 
+    private fun handleScanResult(scannedCode: String) {
+        if (scannedCode.isNotEmpty()) {
+            val newRequest = UpdateRequest(scannedCode,"true")
+            sendScannedCodeToServer(newRequest)
+        } else {
+            Toast.makeText(this, "Сканированный код пустой", Toast.LENGTH_SHORT).show()
+        }
+    }
     private fun processScannedCode(scannedCode: String) {
         if (scannedCode.isNotEmpty()) {
-            // Логируем сканированный код
             Log.d("ShipmentsProds", "Сканированный код: $scannedCode")
-
-            // Отправка кода на сервер
-            sendScannedCodeToServer(scannedCode)
+            val newRequest = UpdateRequest(scannedCode,"true")
+            sendScannedCodeToServer(newRequest)
         } else {
             Toast.makeText(this, "Сканированный код пустой", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun fetchItemsFromServer(load: String) {
+    private fun fetchItemsFromServer() {
         val apiService = ApiClient.getClient().create(APIService::class.java)
-        val call = apiService.getItems(load)
+        val call = apiService.getItems()
 
         call.enqueue(object : Callback<List<ItemFromWB>> {
             override fun onResponse(call: Call<List<ItemFromWB>>, response: Response<List<ItemFromWB>>) {
                 if (response.isSuccessful) {
-                    // Получаем список элементов
                     val itemsFromServer = response.body()?.toMutableList() ?: mutableListOf()
 
-                    // Обновляем адаптер с полученными данными
                     itemAdapter.updateItems(itemsFromServer)
+                    checkShipmentItemsFromServer()
                 } else {
-                    // Обработка ошибок
                     Toast.makeText(this@ShipmentsProds, "Не удалось получить данные", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<List<ItemFromWB>>, t: Throwable) {
-                // Обработка ошибки сети
                 Toast.makeText(this@ShipmentsProds, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
-    private fun sendScannedCodeToServer(article: String) {
-//        val apiService = ApiClient.getClient().create(APIService::class.java)
-//        val call = apiService.updateByArticle(article)
-//
-//        call.enqueue(object : Callback<Void> {
-//            override fun onResponse(call: Call<Void>, response: Response<Void>) {
-//                if (response.isSuccessful) {
-//                    Toast.makeText(this@ShipmentsProds, "Код успешно отправлен на сервер", Toast.LENGTH_SHORT).show()
-//                    // Загружаем обновленный список элементов с сервера только после успешного обновления
-//                    fetchItemsFromServer("false")
-//                } else {
-//                    Toast.makeText(this@ShipmentsProds, "Ошибка отправки кода: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
-//                }
-//            }
-//
-//            override fun onFailure(call: Call<Void>, t: Throwable) {
-//                Toast.makeText(this@ShipmentsProds, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT).show()
-//            }
-//        })
+    private fun sendScannedCodeToServer(updateRequest: UpdateRequest) {
+        val apiService = ApiClient.getClient().create(APIService::class.java)
+
+        val call = apiService.updateByArticle(updateRequest)
+
+       call.enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@ShipmentsProds, "ОБНОВЛЕНО", Toast.LENGTH_SHORT).show()
+                    fetchItemsFromServer()
+                } else {
+                    Toast.makeText(this@ShipmentsProds, "Ошибка ОБНОВЛЕНИЯ: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Toast.makeText(this@ShipmentsProds, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
+
+
+    private fun shipping() {
+        val apiService = ApiClient.getClient().create(APIService::class.java)
+
+        val call = apiService.ship()
+
+        call.enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@ShipmentsProds, "Отгрузка успешна", Toast.LENGTH_SHORT).show()
+                    fetchItemsFromServer()
+                } else {
+                    Toast.makeText(this@ShipmentsProds, "Ошибка отгрузки: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Toast.makeText(this@ShipmentsProds, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun outOfStock(id:Int) {
+        val apiService = ApiClient.getClient().create(APIService::class.java)
+
+        val call = apiService.outOfStock(id)
+
+        call.enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@ShipmentsProds, "Не достаток был одобрен", Toast.LENGTH_SHORT).show()
+                    fetchItemsFromServer()
+                } else {
+                    Toast.makeText(this@ShipmentsProds, "Ошибка при одобрении: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Toast.makeText(this@ShipmentsProds, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun checkShipmentItemsFromServer() {
+        val apiService = ApiClient.getClient().create(APIService::class.java)
+
+        val call = apiService.checkShipmentItems()
+
+        call.enqueue(object : Callback<ShipmentItemsStatusResponse> {
+            override fun onResponse(call: Call<ShipmentItemsStatusResponse>, response: Response<ShipmentItemsStatusResponse>) {
+                if (response.isSuccessful) {
+                    val result = response.body()
+                    buttonSuccess.isEnabled = result?.status == "true"
+                } else {
+                    Toast.makeText(this@ShipmentsProds, "Ошибка проверки: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<ShipmentItemsStatusResponse>, t: Throwable) {
+                Toast.makeText(this@ShipmentsProds, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
     private fun initBinding() {
         binding = ActivityShipmentsProdsBinding.inflate(layoutInflater)
         setContentView(binding.root)

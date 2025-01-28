@@ -6,5 +6,6 @@
         <domain name="ip" includeSubdomains="false">172.19.0.1</domain>
         <domain name="ip" includeSubdomains="false">192.168.0.100</domain>
         <domain name="ip" includeSubdomains="false">192.168.0.105</domain>
+        <domain name="ip" includeSubdomains="false">192.168.133.52</domain>
     </domain-config>
 </network-security-config>
