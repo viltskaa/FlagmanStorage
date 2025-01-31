@@ -11,7 +11,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.flagmanstorage.API.APIService
 import com.example.flagmanstorage.API.ApiClient
+import com.example.flagmanstorage.API.ShipRequest
 import com.example.flagmanstorage.API.ShipmentItemsStatusResponse
+import com.example.flagmanstorage.API.UniqueItem
 import com.example.flagmanstorage.API.UpdateRequest
 import com.example.flagmanstorage.QrScanner.PreferencesHelper
 import com.example.flagmanstorage.QrScanner.QrScanner
@@ -78,7 +80,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
 
     private fun handleScanResult(scannedCode: String) {
         if (scannedCode.isNotEmpty()) {
-            val newRequest = UpdateRequest(scannedCode,"true")
+            val newRequest = ShipRequest(scannedCode)
             sendScannedCodeToServer(newRequest)
         } else {
             Toast.makeText(this, "Сканированный код пустой", Toast.LENGTH_SHORT).show()
@@ -87,7 +89,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
     private fun processScannedCode(scannedCode: String) {
         if (scannedCode.isNotEmpty()) {
             Log.d("ShipmentsProds", "Сканированный код: $scannedCode")
-            val newRequest = UpdateRequest(scannedCode,"true")
+            val newRequest = ShipRequest(scannedCode)
             sendScannedCodeToServer(newRequest)
         } else {
             Toast.makeText(this, "Сканированный код пустой", Toast.LENGTH_SHORT).show()
@@ -115,18 +117,18 @@ class ShipmentsProds : TwoDimScannerActivity() {
             }
         })
     }
-    private fun sendScannedCodeToServer(updateRequest: UpdateRequest) {
+    private fun sendScannedCodeToServer(shipRequest: ShipRequest) {
         val apiService = ApiClient.getClient().create(APIService::class.java)
 
-        val call = apiService.updateByArticle(updateRequest)
+        val call = apiService.scanQrShip(shipRequest)
 
        call.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
-                    Toast.makeText(this@ShipmentsProds, "ОБНОВЛЕНО", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ShipmentsProds, "Успешно все", Toast.LENGTH_SHORT).show()
                     fetchItemsFromServer()
                 } else {
-                    Toast.makeText(this@ShipmentsProds, "Ошибка ОБНОВЛЕНИЯ: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ShipmentsProds, "Ошибка при сканировании: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
                 }
             }
 
@@ -205,18 +207,6 @@ class ShipmentsProds : TwoDimScannerActivity() {
         setContentView(binding.root)
     }
 
-    override fun onBackPressed() {
-        AlertDialog.Builder(this)
-            .setTitle("Подтверждение")
-            .setMessage("Вы точно хотите выйти? Данные не сохранятся.")
-            .setPositiveButton("Да") { dialog, _ ->
-                super.onBackPressed()
-                dialog.dismiss()
-            }
-            .setNegativeButton("Нет") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .show()
-    }
+    
 
 }

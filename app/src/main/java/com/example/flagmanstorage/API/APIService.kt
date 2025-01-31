@@ -41,7 +41,11 @@ interface APIService {
     @POST("/v1/shipment_item/ship")
     fun ship(): Call<Void>
 
+    @POST("/v1/shipment_item/scanQr")
+    fun scanQrShip(@Body item: ShipRequest): Call<Void>
+
     @POST("/v1/shipment_item/{id}")
+
     fun outOfStock(@Path("id") itemId: Int): Call<Void>
 
 
