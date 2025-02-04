@@ -20,7 +20,7 @@ class ItemFromWBAdapter(private var Items: MutableList<ItemFromWB>) :
         fun bind(item: ItemFromWB) {
             binding.textViewArticle.text = "${item.article} - ${item.count_cur} шт. / ${item.count_all} шт."
             binding.hiddenInput.text = Editable.Factory.getInstance().newEditable(item.id.toString())
-            if(item.count_cur == item.count_all)
+            if(item.count_cur == item.count_all || item.status=="POSTPONED")
             {
                 binding.buttonAction.isEnabled=false
                 binding.buttonAction.setBackgroundColor(R.color.red_false)
