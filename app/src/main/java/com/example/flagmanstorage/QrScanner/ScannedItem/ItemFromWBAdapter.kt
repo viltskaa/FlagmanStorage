@@ -2,6 +2,7 @@ package com.example.flagmanstorage.QrScanner.ScannedItem
 
 import android.annotation.SuppressLint
 import android.text.Editable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Button
@@ -19,6 +20,7 @@ class ItemFromWBAdapter(private var Items: MutableList<ItemFromWB>) :
         @SuppressLint("ResourceAsColor")
         fun bind(item: ItemFromWB) {
             binding.textViewArticle.text = "${item.article} - ${item.count_cur} шт. / ${item.count_all} шт."
+            binding.textForThis.text = item.for_this
             binding.hiddenInput.text = Editable.Factory.getInstance().newEditable(item.id.toString())
             if(item.count_cur == item.count_all || item.status=="POSTPONED")
             {
