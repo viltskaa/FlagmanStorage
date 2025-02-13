@@ -22,6 +22,8 @@ class ItemFromWBAdapter(private var Items: MutableList<ItemFromWB>) :
             binding.textViewArticle.text = "${item.article} - ${item.count_cur} шт. / ${item.count_all} шт."
             binding.textForThis.text = item.for_this
             binding.hiddenInput.text = Editable.Factory.getInstance().newEditable(item.id.toString())
+            binding.buttonAction.isEnabled = true
+            binding.buttonAction.setBackgroundColor(android.R.color.holo_red_dark)
             if(item.count_cur == item.count_all || item.status=="POSTPONED")
             {
                 binding.buttonAction.isEnabled=false
