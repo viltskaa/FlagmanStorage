@@ -27,7 +27,6 @@ class MainActivity2 : TwoDimScannerActivity() {
     private lateinit var userPreferences: UserPreferences
     private var buffer: String = ""
 
-    // Регистрация для обработки результата сканирования
     private val scanLauncher = registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
         qrScanner.handleQrScanResult(result,
             { scannedCode ->
@@ -38,10 +37,9 @@ class MainActivity2 : TwoDimScannerActivity() {
             })
     }
 
-    // Регистрация для запроса разрешений на камеру
     private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
         if (isGranted) {
-            qrScanner.showCameraForQrOnly() // Если разрешение получено, запускаем сканирование
+            qrScanner.showCameraForQrOnly()
         } else {
             Toast.makeText(this, "Требуется разрешение на использование камеры", Toast.LENGTH_SHORT).show()
         }
@@ -59,14 +57,12 @@ class MainActivity2 : TwoDimScannerActivity() {
 
     private fun initViews() {
         binding.buttonAuth.setOnClickListener {
-            handleScanResult("test,test,test")
+            handleScanResult("Ольга,Бутузова,ХЗ,1234567")
         }
     }
 
-    // Обработка результата сканирования
     private fun handleScanResult(scannedCode: String) {
         if (scannedCode.isNotEmpty()) {
-            // Преобразуем данные QR в объект и сохраняем в SharedPreferences
             parseAndSaveUserData(scannedCode)
         } else {
             Toast.makeText(this, "Сканированный код пустой", Toast.LENGTH_SHORT).show()
@@ -76,7 +72,7 @@ class MainActivity2 : TwoDimScannerActivity() {
     private fun parseAndSaveUserData(scannedCode: String) {
         try {
             val values = scannedCode.split(",")
-            if (values.count() != 3) {
+            if (values.count() != 4) {
                 Toast.makeText(this, "Ошибка при разборе QR-кода", Toast.LENGTH_SHORT).show()
                 return
             }
@@ -84,10 +80,11 @@ class MainActivity2 : TwoDimScannerActivity() {
             val name = values[0]
             val surname = values[1]
             val patronymic = values[2]
+            val password = values[3]
 
-            val loginRequest = LoginRequest(name, surname, patronymic)
+            val loginRequest = LoginRequest(name, surname, patronymic, password)
 
-            val apiService = ApiClient.getClient().create(APIService::class.java)
+            val apiService = ApiClient.getClient(this).create(APIService::class.java)
 
             apiService.login(loginRequest).enqueue(object : Callback<LoginResponse> {
                 override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {

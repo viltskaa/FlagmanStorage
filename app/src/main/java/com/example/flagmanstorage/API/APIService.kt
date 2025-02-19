@@ -47,7 +47,8 @@ interface APIService {
     @POST("/v1/shipment_item/{id}")
 
     fun outOfStock(@Path("id") itemId: Int): Call<Void>
-
+    @POST("/v1/auth/refresh")
+    fun refresh(@Body loginRequest: LoginRequest): Call<LoginResponse>
 
     @POST("/v1/auth/login")
     fun login(@Body loginRequest: LoginRequest): Call<LoginResponse>

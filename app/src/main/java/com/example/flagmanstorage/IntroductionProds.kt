@@ -20,6 +20,8 @@ import com.example.flagmanstorage.QrScanner.PreferencesHelper
 import com.example.flagmanstorage.QrScanner.QrScanner
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItem
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItemDisplayAdapter
+import com.example.flagmanstorage.QrScanner.User.LoginRequest
+import com.example.flagmanstorage.QrScanner.User.LoginResponse
 import com.example.flagmanstorage.QrScanner.UserPreferences
 import com.example.flagmanstorage.databinding.ActivityIntroductionProdsBinding
 import com.journeyapps.barcodescanner.ScanContract
@@ -166,7 +168,7 @@ class IntroductionProds : AppCompatActivity() {
             val products = preferencesHelper.getScannedItems()
             if (products.isNotEmpty()) {
                 // Инициализация Retrofit
-                val apiService = ApiClient.getClient().create(APIService::class.java)
+                val apiService = ApiClient.getClient(this).create(APIService::class.java)
                 val call = apiService.sendProducts(products.map { Product(it.qrcode) })
                 
                 call.enqueue(object : Callback<Void> {
@@ -174,7 +176,12 @@ class IntroductionProds : AppCompatActivity() {
                         if (response.isSuccessful) {
                             Toast.makeText(this@IntroductionProds, "Список успешно отправлен!", Toast.LENGTH_LONG).show()
                         } else {
-                            Toast.makeText(this@IntroductionProds, "Response Code: ${response.code()}, Message: ${response.message()}", Toast.LENGTH_LONG).show()
+                            if (response.code() == 401) {
+                                handleUnauthorizedError()
+                            }else{
+                                Toast.makeText(this@IntroductionProds, "Response Code: ${response.code()}, Message: ${response.message()}", Toast.LENGTH_LONG).show()
+                            }
+
                         }
                     }
 
@@ -199,6 +206,38 @@ class IntroductionProds : AppCompatActivity() {
     private fun initBinding() {
         binding = ActivityIntroductionProdsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+    }
+
+    private fun handleUnauthorizedError() {
+        val full_name:String = userPreferences.getUserName().toString()
+        val values = full_name.split(" ")
+        val name = values[1]
+        val surname = values[0]
+        val patronymic = values[2]
+        val loginRequest = LoginRequest(name, surname, patronymic, "")
+        val apiService = ApiClient.getClient(this).create(APIService::class.java)
+        val call = apiService.refresh(loginRequest)
+
+        call.enqueue(object : Callback<LoginResponse> {
+            override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+                if (response.isSuccessful) {
+                    val loginResponse = response.body()
+                    loginResponse?.token?.let {
+                        userPreferences.saveToken(it)
+                        userPreferences.saveLoginStatus(true)
+                    } ?: run {
+                        Toast.makeText(this@IntroductionProds, "Ошибка при получении токена", Toast.LENGTH_SHORT).show()
+                    }
+                    Toast.makeText(this@IntroductionProds, loginResponse?.msg.toString(), Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@IntroductionProds, "Ошибка входа: ${response.message()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                Toast.makeText(this@IntroductionProds, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }
 

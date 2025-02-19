@@ -19,6 +19,9 @@ import com.example.flagmanstorage.QrScanner.PreferencesHelper
 import com.example.flagmanstorage.QrScanner.QrScanner
 import com.example.flagmanstorage.QrScanner.ScannedItem.ItemFromWB
 import com.example.flagmanstorage.QrScanner.ScannedItem.ItemFromWBAdapter
+import com.example.flagmanstorage.QrScanner.User.LoginRequest
+import com.example.flagmanstorage.QrScanner.User.LoginResponse
+import com.example.flagmanstorage.QrScanner.UserPreferences
 import com.example.flagmanstorage.databinding.ActivityShipmentsProdsBinding
 import com.example.flagmanstorage.utils.TwoDimScannerActivity
 import com.journeyapps.barcodescanner.ScanContract
@@ -33,6 +36,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
     private lateinit var qrScanner: QrScanner
     private lateinit var itemAdapter: ItemFromWBAdapter
     private lateinit var buttonSuccess: Button
+    private lateinit var userPreferences: UserPreferences
     private var buffer: String = ""
     private val scanLauncher = registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
         qrScanner.handleScanResult(result) { scannedCode ->
@@ -57,6 +61,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
         binding.root.isFocusable = true
         binding.root.isFocusableInTouchMode = true
         binding.root.requestFocus()
+        userPreferences = UserPreferences(this)
         initViews()
         super.setCallbackAfterScan(::handleScanResult)
         val recyclerView = findViewById<RecyclerView>(R.id.productList)
@@ -97,7 +102,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
     }
 
     private fun fetchItemsFromServer() {
-        val apiService = ApiClient.getClient().create(APIService::class.java)
+        val apiService = ApiClient.getClient(this).create(APIService::class.java)
         val call = apiService.getItems()
 
         call.enqueue(object : Callback<List<ItemFromWB>> {
@@ -108,7 +113,12 @@ class ShipmentsProds : TwoDimScannerActivity() {
                     itemAdapter.updateItems(itemsFromServer)
                     checkShipmentItemsFromServer()
                 } else {
-                    Toast.makeText(this@ShipmentsProds, "Не удалось получить данные", Toast.LENGTH_SHORT).show()
+                    if (response.code() == 401) {
+                        handleUnauthorizedError()
+                    }else{
+                        Toast.makeText(this@ShipmentsProds, "Не удалось получить данные", Toast.LENGTH_SHORT).show()
+                    }
+
                 }
             }
 
@@ -118,7 +128,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
         })
     }
     private fun sendScannedCodeToServer(shipRequest: ShipRequest) {
-        val apiService = ApiClient.getClient().create(APIService::class.java)
+        val apiService = ApiClient.getClient(this).create(APIService::class.java)
 
         val call = apiService.scanQrShip(shipRequest)
 
@@ -128,7 +138,12 @@ class ShipmentsProds : TwoDimScannerActivity() {
                     Toast.makeText(this@ShipmentsProds, "Успешно все", Toast.LENGTH_SHORT).show()
                     fetchItemsFromServer()
                 } else {
-                    Toast.makeText(this@ShipmentsProds, "Ошибка при сканировании: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                    if (response.code() == 401) {
+                        handleUnauthorizedError()
+                    }else{
+                        Toast.makeText(this@ShipmentsProds, "Ошибка при сканировании: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                    }
+
                 }
             }
 
@@ -140,7 +155,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
 
 
     private fun shipping() {
-        val apiService = ApiClient.getClient().create(APIService::class.java)
+        val apiService = ApiClient.getClient(this).create(APIService::class.java)
 
         val call = apiService.ship()
 
@@ -150,7 +165,11 @@ class ShipmentsProds : TwoDimScannerActivity() {
                     Toast.makeText(this@ShipmentsProds, "Отгрузка успешна", Toast.LENGTH_SHORT).show()
                     fetchItemsFromServer()
                 } else {
-                    Toast.makeText(this@ShipmentsProds, "Ошибка отгрузки: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                    if (response.code() == 401) {
+                        handleUnauthorizedError()
+                    }else{
+                        Toast.makeText(this@ShipmentsProds, "Ошибка отгрузки: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
 
@@ -161,7 +180,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
     }
 
     private fun outOfStock(id:Int) {
-        val apiService = ApiClient.getClient().create(APIService::class.java)
+        val apiService = ApiClient.getClient(this).create(APIService::class.java)
 
         val call = apiService.outOfStock(id)
 
@@ -171,7 +190,12 @@ class ShipmentsProds : TwoDimScannerActivity() {
                     Toast.makeText(this@ShipmentsProds, "Не достаток был одобрен", Toast.LENGTH_SHORT).show()
                     fetchItemsFromServer()
                 } else {
-                    Toast.makeText(this@ShipmentsProds, "Ошибка при одобрении: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                    if (response.code() == 401) {
+                        handleUnauthorizedError()
+                    }else{
+                        Toast.makeText(this@ShipmentsProds, "Ошибка при одобрении: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                    }
+
                 }
             }
 
@@ -182,7 +206,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
     }
 
     private fun checkShipmentItemsFromServer() {
-        val apiService = ApiClient.getClient().create(APIService::class.java)
+        val apiService = ApiClient.getClient(this).create(APIService::class.java)
 
         val call = apiService.checkShipmentItems()
 
@@ -192,7 +216,11 @@ class ShipmentsProds : TwoDimScannerActivity() {
                     val result = response.body()
                     buttonSuccess.isEnabled = result?.status == "true"
                 } else {
-                    Toast.makeText(this@ShipmentsProds, "Ошибка проверки: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                    if (response.code() == 401) {
+                        handleUnauthorizedError()
+                    }else{
+                        Toast.makeText(this@ShipmentsProds, "Ошибка проверки: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
 
@@ -207,6 +235,38 @@ class ShipmentsProds : TwoDimScannerActivity() {
         setContentView(binding.root)
     }
 
-    
+
+    private fun handleUnauthorizedError() {
+        val full_name:String = userPreferences.getUserName().toString()
+        val values = full_name.split(" ")
+        val name = values[1]
+        val surname = values[0]
+        val patronymic = values[2]
+        val loginRequest = LoginRequest(name, surname, patronymic, "")
+        val apiService = ApiClient.getClient(this).create(APIService::class.java)
+        val call = apiService.refresh(loginRequest)
+
+        call.enqueue(object : Callback<LoginResponse> {
+            override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+                if (response.isSuccessful) {
+                    val loginResponse = response.body()
+                    loginResponse?.token?.let {
+                        userPreferences.saveToken(it)
+                        userPreferences.saveLoginStatus(true)
+                    } ?: run {
+                        Toast.makeText(this@ShipmentsProds, "Ошибка при получении токена", Toast.LENGTH_SHORT).show()
+                    }
+                    Toast.makeText(this@ShipmentsProds, loginResponse?.msg.toString(), Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@ShipmentsProds, "Ошибка входа: ${response.message()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                Toast.makeText(this@ShipmentsProds, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
 
 }
