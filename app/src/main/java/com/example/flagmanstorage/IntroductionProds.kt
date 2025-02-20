@@ -174,6 +174,8 @@ class IntroductionProds : AppCompatActivity() {
                 call.enqueue(object : Callback<Void> {
                     override fun onResponse(call: Call<Void>, response: Response<Void>) {
                         if (response.isSuccessful) {
+                            preferencesHelper.clearAllScannedItems()
+                            updateProductList()
                             Toast.makeText(this@IntroductionProds, "Список успешно отправлен!", Toast.LENGTH_LONG).show()
                         } else {
                             if (response.code() == 401) {
@@ -192,8 +194,7 @@ class IntroductionProds : AppCompatActivity() {
             } else {
                 Toast.makeText(this, "Список пуст, заполните его", Toast.LENGTH_SHORT).show()
             }
-            preferencesHelper.clearAllScannedItems()
-            updateProductList()
+
         }
     }
 
