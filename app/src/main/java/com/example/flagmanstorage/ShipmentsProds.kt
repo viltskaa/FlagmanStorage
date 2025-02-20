@@ -21,6 +21,7 @@ import com.example.flagmanstorage.QrScanner.ScannedItem.ItemFromWB
 import com.example.flagmanstorage.QrScanner.ScannedItem.ItemFromWBAdapter
 import com.example.flagmanstorage.QrScanner.User.LoginRequest
 import com.example.flagmanstorage.QrScanner.User.LoginResponse
+import com.example.flagmanstorage.QrScanner.User.RefreshRequest
 import com.example.flagmanstorage.QrScanner.UserPreferences
 import com.example.flagmanstorage.databinding.ActivityShipmentsProdsBinding
 import com.example.flagmanstorage.utils.TwoDimScannerActivity
@@ -242,7 +243,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
         val name = values[1]
         val surname = values[0]
         val patronymic = values[2]
-        val loginRequest = LoginRequest(name, surname, patronymic, "")
+        val loginRequest = RefreshRequest(name, surname, patronymic)
         val apiService = ApiClient.getClient(this).create(APIService::class.java)
         val call = apiService.refresh(loginRequest)
 

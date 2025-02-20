@@ -4,6 +4,7 @@ import com.example.flagmanstorage.QrScanner.ScannedItem.ItemFromWB
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItem
 import com.example.flagmanstorage.QrScanner.User.LoginRequest
 import com.example.flagmanstorage.QrScanner.User.LoginResponse
+import com.example.flagmanstorage.QrScanner.User.RefreshRequest
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.Body
@@ -48,7 +49,7 @@ interface APIService {
 
     fun outOfStock(@Path("id") itemId: Int): Call<Void>
     @POST("/v1/auth/refresh")
-    fun refresh(@Body loginRequest: LoginRequest): Call<LoginResponse>
+    fun refresh(@Body loginRequest: RefreshRequest): Call<LoginResponse>
 
     @POST("/v1/auth/login")
     fun login(@Body loginRequest: LoginRequest): Call<LoginResponse>

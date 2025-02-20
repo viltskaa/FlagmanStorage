@@ -49,7 +49,9 @@ class MainActivity2 : TwoDimScannerActivity() {
         super.onCreate(savedInstanceState)
         initBinding()
         initViews()
-
+        binding.root.isFocusable = true
+        binding.root.isFocusableInTouchMode = true
+        binding.root.requestFocus()
         // Инициализация экземпляра QrScanner
         qrScanner = QrScanner(this, scanLauncher, requestPermissionLauncher)
         super.setCallbackAfterScan(::handleScanResult)
@@ -57,7 +59,7 @@ class MainActivity2 : TwoDimScannerActivity() {
 
     private fun initViews() {
         binding.buttonAuth.setOnClickListener {
-            handleScanResult("Ольга,Бутузова,ХЗ,1234567")
+            handleScanResult("nameolga,surnamebutuzova,patronymichz,password1234567")
         }
     }
 
@@ -71,18 +73,14 @@ class MainActivity2 : TwoDimScannerActivity() {
 
     private fun parseAndSaveUserData(scannedCode: String) {
         try {
-            val values = scannedCode.split(",")
-            if (values.count() != 4) {
-                Toast.makeText(this, "Ошибка при разборе QR-кода", Toast.LENGTH_SHORT).show()
-                return
-            }
+            val qrcodeData = scannedCode.split(",")
 
-            val name = values[0]
-            val surname = values[1]
-            val patronymic = values[2]
-            val password = values[3]
+            val surname = qrcodeData[1].substring(7)
+            val name = qrcodeData[0].substring(4)
+            val patronymic = qrcodeData[2].substring(10)
 
-            val loginRequest = LoginRequest(name, surname, patronymic, password)
+            val loginRequest = LoginRequest(scannedCode)
+
 
             val apiService = ApiClient.getClient(this).create(APIService::class.java)
 

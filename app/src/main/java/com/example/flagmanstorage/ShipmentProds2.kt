@@ -26,6 +26,7 @@ import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItem
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItemDisplayAdapter
 import com.example.flagmanstorage.QrScanner.User.LoginRequest
 import com.example.flagmanstorage.QrScanner.User.LoginResponse
+import com.example.flagmanstorage.QrScanner.User.RefreshRequest
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanIntentResult
 import retrofit2.Call
@@ -235,7 +236,7 @@ class ShipmentProds2 : AppCompatActivity() {
         val name = values[1]
         val surname = values[0]
         val patronymic = values[2]
-        val loginRequest = LoginRequest(name, surname, patronymic, "")
+        val loginRequest = RefreshRequest(name, surname, patronymic)
         val apiService = ApiClient.getClient(this).create(APIService::class.java)
         val call = apiService.refresh(loginRequest)
 
