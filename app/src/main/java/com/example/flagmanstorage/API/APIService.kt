@@ -53,4 +53,11 @@ interface APIService {
 
     @POST("/v1/auth/login")
     fun login(@Body loginRequest: LoginRequest): Call<LoginResponse>
+
+    @POST("/v1/item/check_storage")
+    fun checkStorage(@Body product: Product): Call<CheckResponse>
+
+    @POST("/v1/item/check_write_off")
+    fun checkWriteOff(@Body product: Product): Call<CheckResponse>
+
 }

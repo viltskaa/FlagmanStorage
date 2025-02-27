@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.flagmanstorage.API.APIService
 import com.example.flagmanstorage.API.ApiClient
+import com.example.flagmanstorage.API.CheckResponse
 import com.example.flagmanstorage.API.Product
 import com.example.flagmanstorage.QrScanner.PreferencesHelper
 import com.example.flagmanstorage.QrScanner.QrScanner
@@ -152,9 +153,29 @@ class IntroductionProds : AppCompatActivity() {
             )
 
             if (!preferencesHelper.isScannedItemExists(timestamp)) {
-                preferencesHelper.saveScannedItem(scannedItem)
-                adapter.notifyDataSetChanged()
-                updateProductList()
+                val apiService = ApiClient.getClient(this).create(APIService::class.java)
+                val call = apiService.checkStorage(Product(scannedCode))
+
+                call.enqueue(object : Callback<CheckResponse> {
+                    override fun onResponse(call: Call<CheckResponse>, response: Response<CheckResponse>) {
+                        if (response.isSuccessful) {
+                            val exists = response.body()?.exists
+                            if (exists == "false") {
+                                preferencesHelper.saveScannedItem(scannedItem)
+                                adapter.notifyDataSetChanged()
+                                updateProductList()
+                            } else {
+                                Toast.makeText(this@IntroductionProds, "Товар уже на складе", Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            Toast.makeText(this@IntroductionProds, "Ошибка проверки на сервере", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                    override fun onFailure(call: Call<CheckResponse>, t: Throwable) {
+                        Toast.makeText(this@IntroductionProds, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT).show()
+                    }
+                })
             }
         } else {
             Toast.makeText(this, "Сканированный код пустой", Toast.LENGTH_SHORT).show()
