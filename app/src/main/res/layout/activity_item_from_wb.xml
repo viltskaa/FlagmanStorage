@@ -26,6 +26,7 @@
             android:paddingBottom="8dp"
             android:fontFamily="sans-serif-medium"
             android:layout_gravity="center"/>
+
         <TextView
             android:id="@+id/textForThis"
             android:layout_width="wrap_content"
@@ -36,19 +37,22 @@
             android:paddingBottom="8dp"
             android:fontFamily="sans-serif-medium"
             android:layout_gravity="center"/>
+
         <EditText
             android:id="@+id/hiddenInput"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:inputType="none" />
+            android:inputType="none"/>
     </LinearLayout>
-    <Button
-        android:id="@+id/buttonAction"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:backgroundTint="@android:color/holo_red_dark"
-        android:textColor="@android:color/white"
-        android:layout_gravity="end" />
+
+    <!-- Картинка справа -->
+    <ImageView
+        android:id="@+id/imageViewItem"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:src="@drawable/notscanned"
+        android:contentDescription="Изображение товара"
+        android:layout_marginStart="16dp"/>
 </LinearLayout>

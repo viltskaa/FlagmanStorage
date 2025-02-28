@@ -25,6 +25,9 @@
         android:theme="@style/Theme.FlagmanStorage"
         tools:targetApi="31">
         <activity
+            android:name=".orderFromWb"
+            android:exported="false" />
+        <activity
             android:name=".Settings"
             android:exported="false" />
         <activity

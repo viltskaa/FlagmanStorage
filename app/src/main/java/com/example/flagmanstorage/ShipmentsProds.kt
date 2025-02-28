@@ -19,6 +19,8 @@ import com.example.flagmanstorage.QrScanner.PreferencesHelper
 import com.example.flagmanstorage.QrScanner.QrScanner
 import com.example.flagmanstorage.QrScanner.ScannedItem.ItemFromWB
 import com.example.flagmanstorage.QrScanner.ScannedItem.ItemFromWBAdapter
+import com.example.flagmanstorage.QrScanner.ScannedItem.OrderFromWb
+import com.example.flagmanstorage.QrScanner.ScannedItem.OrderFromWbAdapter
 import com.example.flagmanstorage.QrScanner.User.LoginRequest
 import com.example.flagmanstorage.QrScanner.User.LoginResponse
 import com.example.flagmanstorage.QrScanner.User.RefreshRequest
@@ -35,7 +37,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
 
     private lateinit var binding: ActivityShipmentsProdsBinding // Замените на соответствующий класс привязки
     private lateinit var qrScanner: QrScanner
-    private lateinit var itemAdapter: ItemFromWBAdapter
+    private lateinit var itemAdapter: OrderFromWbAdapter
     private lateinit var buttonSuccess: Button
     private lateinit var userPreferences: UserPreferences
     private var buffer: String = ""
@@ -66,19 +68,16 @@ class ShipmentsProds : TwoDimScannerActivity() {
         initViews()
         super.setCallbackAfterScan(::handleScanResult)
         val recyclerView = findViewById<RecyclerView>(R.id.productList)
-        itemAdapter = ItemFromWBAdapter(mutableListOf())
+        itemAdapter = OrderFromWbAdapter(mutableListOf())
         recyclerView.adapter = itemAdapter
         recyclerView.layoutManager = LinearLayoutManager(this)
         itemAdapter.onActionClickListener = { product ->
-            outOfStock(product.id)
+            outOfStock(product.orderUid)
         }
         fetchItemsFromServer()
     }
 
     private fun initViews() {
-        binding.buttonScan.setOnClickListener {
-            qrScanner.checkCameraPermission { qrScanner.showCamera() }
-        }
         binding.buttonShip.setOnClickListener {
             shipping()
         }
@@ -106,13 +105,13 @@ class ShipmentsProds : TwoDimScannerActivity() {
         val apiService = ApiClient.getClient(this).create(APIService::class.java)
         val call = apiService.getItems()
 
-        call.enqueue(object : Callback<List<ItemFromWB>> {
-            override fun onResponse(call: Call<List<ItemFromWB>>, response: Response<List<ItemFromWB>>) {
+        call.enqueue(object : Callback<List<OrderFromWb>> {
+            override fun onResponse(call: Call<List<OrderFromWb>>, response: Response<List<OrderFromWb>>) {
                 if (response.isSuccessful) {
                     val itemsFromServer = response.body()?.toMutableList() ?: mutableListOf()
 
                     itemAdapter.updateItems(itemsFromServer)
-                    checkShipmentItemsFromServer()
+                    //checkShipmentItemsFromServer()
                 } else {
                     if (response.code() == 401) {
                         handleUnauthorizedError()
@@ -123,7 +122,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<List<ItemFromWB>>, t: Throwable) {
+            override fun onFailure(call: Call<List<OrderFromWb>>, t: Throwable) {
                 Toast.makeText(this@ShipmentsProds, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
@@ -180,7 +179,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
         })
     }
 
-    private fun outOfStock(id:Int) {
+    private fun outOfStock(id:String) {
         val apiService = ApiClient.getClient(this).create(APIService::class.java)
 
         val call = apiService.outOfStock(id)

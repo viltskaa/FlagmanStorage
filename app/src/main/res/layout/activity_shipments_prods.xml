@@ -16,19 +16,6 @@
         android:layout_weight="1"
         android:layout_marginTop="16dp"/>
 
-    <Button
-        android:id="@+id/button_scan"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:backgroundTint="#FF6F61"
-        android:text="Сканировать"
-        android:textColor="@android:color/white"
-        android:textSize="24sp"
-        android:layout_marginBottom="16dp"
-        android:padding="10dp"
-        android:elevation="4dp"
-        android:background="@drawable/rounded_button"/>
 
     <Button
         android:id="@+id/button_ship"

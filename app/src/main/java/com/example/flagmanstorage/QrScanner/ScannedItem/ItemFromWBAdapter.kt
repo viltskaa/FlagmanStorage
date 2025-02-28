@@ -14,24 +14,20 @@ import com.example.flagmanstorage.databinding.ActivityItemFromWbBinding
 
 class ItemFromWBAdapter(private var Items: MutableList<ItemFromWB>) :
     RecyclerView.Adapter<ItemFromWBAdapter.ItemFromWBViewHolder>() {
-    var onActionClickListener: ((ItemFromWB) -> Unit)? = null
     inner class ItemFromWBViewHolder(private val binding: ActivityItemFromWbBinding) :
         RecyclerView.ViewHolder(binding.root) {
         @SuppressLint("ResourceAsColor")
         fun bind(item: ItemFromWB) {
-            binding.textViewArticle.text = "${item.article} - ${item.count_cur} шт. / ${item.count_all} шт."
+            binding.textViewArticle.text = "${item.article}"
             binding.textForThis.text = item.for_this
             binding.hiddenInput.text = Editable.Factory.getInstance().newEditable(item.id.toString())
-            binding.buttonAction.isEnabled = true
-            binding.buttonAction.setBackgroundColor(android.R.color.holo_red_dark)
-            if(item.count_cur == item.count_all || item.status=="POSTPONED")
-            {
-                binding.buttonAction.isEnabled=false
-                binding.buttonAction.setBackgroundColor(R.color.red_false)
+            if (item.scanned == "NOTSCANNED"){
+                binding.imageViewItem.setImageResource(R.drawable.notscanned)
             }
-            binding.buttonAction.setOnClickListener {
-                onActionClickListener?.invoke(item)
+            else if(item.scanned == "SCANNED"){
+                binding.imageViewItem.setImageResource(R.drawable.scanned)
             }
+
         }
     }
 
@@ -46,16 +42,4 @@ class ItemFromWBAdapter(private var Items: MutableList<ItemFromWB>) :
     }
 
     override fun getItemCount(): Int = Items.size
-
-    private fun removeItem(position: Int) {
-        Items.removeAt(position)
-        notifyItemRemoved(position)
-        notifyItemRangeChanged(position, Items.size)
-    }
-
-    fun updateItems(newItems: List<ItemFromWB>) {
-        Items.clear()
-        Items.addAll(newItems)
-        notifyDataSetChanged()  // Обновляем весь список
-    }
 }

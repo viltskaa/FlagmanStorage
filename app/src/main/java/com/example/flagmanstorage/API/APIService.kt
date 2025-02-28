@@ -1,6 +1,7 @@
 package com.example.flagmanstorage.API
 
 import com.example.flagmanstorage.QrScanner.ScannedItem.ItemFromWB
+import com.example.flagmanstorage.QrScanner.ScannedItem.OrderFromWb
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItem
 import com.example.flagmanstorage.QrScanner.User.LoginRequest
 import com.example.flagmanstorage.QrScanner.User.LoginResponse
@@ -28,7 +29,7 @@ interface APIService {
     fun checkUnique(@Body uniqueItem: UniqueItem): Call<UniqueDataAnswer>
 
     @GET("/v1/shipment_item")
-    fun getItems(): Call<List<ItemFromWB>>
+    fun getItems(): Call<List<OrderFromWb>>
 
     @GET("/v1/item/report")
     fun report(): Call<ResponseBody>
@@ -47,7 +48,7 @@ interface APIService {
 
     @POST("/v1/shipment_item/{id}")
 
-    fun outOfStock(@Path("id") itemId: Int): Call<Void>
+    fun outOfStock(@Path("id") itemId: String): Call<Void>
     @POST("/v1/auth/refresh")
     fun refresh(@Body loginRequest: RefreshRequest): Call<LoginResponse>
 
