@@ -111,7 +111,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
                     val itemsFromServer = response.body()?.toMutableList() ?: mutableListOf()
 
                     itemAdapter.updateItems(itemsFromServer)
-                    //checkShipmentItemsFromServer()
+                    checkShipmentItemsFromServer()
                 } else {
                     if (response.code() == 401) {
                         handleUnauthorizedError()
