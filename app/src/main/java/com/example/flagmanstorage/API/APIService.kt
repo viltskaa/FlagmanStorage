@@ -46,9 +46,9 @@ interface APIService {
     @POST("/v1/shipment_item/scanQr")
     fun scanQrShip(@Body item: ShipRequest): Call<Void>
 
-    @POST("/v1/shipment_item/{id}")
+    @POST("/v1/shipment_item/outOfStock")
 
-    fun outOfStock(@Path("id") itemId: String): Call<Void>
+    fun outOfStock(@Body stockRequest: StockRequest): Call<StockResponse>
     @POST("/v1/auth/refresh")
     fun refresh(@Body loginRequest: RefreshRequest): Call<LoginResponse>
 
@@ -60,5 +60,15 @@ interface APIService {
 
     @POST("/v1/item/check_write_off")
     fun checkWriteOff(@Body product: Product): Call<CheckResponse>
+
+    @POST("/v1/item/check_refund")
+    fun checkRefund(@Body product: Product): Call<CheckResponse>
+
+    @POST("/v1/item/refund")
+    fun sendRefund(@Body scannedItems: List<Product>): Call<Void>
+
+    @POST("/v1/shipment_item/cancel/{orderUid}")
+
+    fun cancel(@Path("orderUid") orderUid: String): Call<Void>
 
 }

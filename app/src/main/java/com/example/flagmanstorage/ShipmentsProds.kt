@@ -13,6 +13,8 @@ import com.example.flagmanstorage.API.APIService
 import com.example.flagmanstorage.API.ApiClient
 import com.example.flagmanstorage.API.ShipRequest
 import com.example.flagmanstorage.API.ShipmentItemsStatusResponse
+import com.example.flagmanstorage.API.StockRequest
+import com.example.flagmanstorage.API.StockResponse
 import com.example.flagmanstorage.API.UniqueItem
 import com.example.flagmanstorage.API.UpdateRequest
 import com.example.flagmanstorage.QrScanner.PreferencesHelper
@@ -72,7 +74,10 @@ class ShipmentsProds : TwoDimScannerActivity() {
         recyclerView.adapter = itemAdapter
         recyclerView.layoutManager = LinearLayoutManager(this)
         itemAdapter.onActionClickListener = { product ->
-            outOfStock(product.orderUid)
+            handleCancelOrder(product)
+        }
+        itemAdapter.onOutOfStockClickListener = { product ->
+            outOfStock(product)
         }
         fetchItemsFromServer()
     }
@@ -91,6 +96,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
             Toast.makeText(this, "Сканированный код пустой", Toast.LENGTH_SHORT).show()
         }
     }
+
     private fun processScannedCode(scannedCode: String) {
         if (scannedCode.isNotEmpty()) {
             Log.d("ShipmentsProds", "Сканированный код: $scannedCode")
@@ -179,15 +185,15 @@ class ShipmentsProds : TwoDimScannerActivity() {
         })
     }
 
-    private fun outOfStock(id:String) {
+    private fun outOfStock(order: OrderFromWb) {
         val apiService = ApiClient.getClient(this).create(APIService::class.java)
+        val newRequest = StockRequest(order.orderUid,"baberzhon babir babirovich")
+        val call = apiService.outOfStock(newRequest)
 
-        val call = apiService.outOfStock(id)
-
-        call.enqueue(object : Callback<Void> {
-            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+        call.enqueue(object : Callback<StockResponse> {
+            override fun onResponse(call: Call<StockResponse>, response: Response<StockResponse>) {
                 if (response.isSuccessful) {
-                    Toast.makeText(this@ShipmentsProds, "Не достаток был одобрен", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ShipmentsProds, "Не достаток был перенесен", Toast.LENGTH_SHORT).show()
                     fetchItemsFromServer()
                 } else {
                     if (response.code() == 401) {
@@ -199,7 +205,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<Void>, t: Throwable) {
+            override fun onFailure(call: Call<StockResponse>, t: Throwable) {
                 Toast.makeText(this@ShipmentsProds, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
@@ -235,6 +241,42 @@ class ShipmentsProds : TwoDimScannerActivity() {
         setContentView(binding.root)
     }
 
+
+    private fun handleCancelOrder(order: OrderFromWb) {
+        AlertDialog.Builder(this)
+            .setMessage("Вы уверены, что хотите отменить заказ ${order.orderUid}?")
+            .setPositiveButton("Да") { dialog, which ->
+                cancelOrder(order)
+            }
+            .setNegativeButton("Нет", null)
+            .show()
+    }
+
+    private fun cancelOrder(order: OrderFromWb) {
+        val apiService = ApiClient.getClient(this).create(APIService::class.java)
+
+        val call = apiService.cancel(order.orderUid)
+
+        call.enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    val result = response.body()
+                    Toast.makeText(this@ShipmentsProds, "Заказ ${order.orderUid} отменен", Toast.LENGTH_SHORT).show()
+                    fetchItemsFromServer()
+                } else {
+                    if (response.code() == 401) {
+                        handleUnauthorizedError()
+                    }else{
+                        Toast.makeText(this@ShipmentsProds, "Ошибка отмены: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Toast.makeText(this@ShipmentsProds, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
 
     private fun handleUnauthorizedError() {
         val full_name:String = userPreferences.getUserName().toString()

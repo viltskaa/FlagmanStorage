@@ -6,6 +6,38 @@
     android:layout_marginBottom="12dp"
     android:layout_marginTop="12dp"
     android:padding="16dp">
+
+    <!-- Контейнер для кнопок -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="8dp">
+
+        <Button
+            android:id="@+id/buttonCancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Отмена"
+            android:backgroundTint="#FF6F61"
+            android:textColor="@android:color/white" />
+
+        <View
+            android:layout_width="16dp"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/buttonTransfer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Перенос"
+            android:backgroundTint="#4CAF50"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+
     <!-- Отображение идентификатора заказа -->
     <TextView
         android:id="@+id/textViewOrderUid"
@@ -17,8 +49,11 @@
         android:textColor="#FF6F61"
         android:paddingBottom="8dp"/>
 
+    <!-- Установить RecyclerView с фиксированной высотой -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewItems"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+    />
 </LinearLayout>

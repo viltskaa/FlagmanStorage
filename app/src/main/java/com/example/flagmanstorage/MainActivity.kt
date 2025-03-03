@@ -43,6 +43,10 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this,SettingsActivity::class.java)
             startActivity(intent)
         }
+        binding.btnRefund.setOnClickListener {
+            val intent = Intent(this,RefundActivity::class.java)
+            startActivity(intent)
+        }
     }
 
 

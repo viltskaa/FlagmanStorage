@@ -1,16 +1,19 @@
 package com.example.flagmanstorage.QrScanner.ScannedItem
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.flagmanstorage.R
 import com.example.flagmanstorage.databinding.ActivityOrderFromWbBinding
 import com.example.flagmanstorage.databinding.ActivityItemFromWbBinding
 
 class OrderFromWbAdapter(private val orders: MutableList<OrderFromWb>) :
     RecyclerView.Adapter<OrderFromWbAdapter.OrderViewHolder>() {
     var onActionClickListener: ((OrderFromWb) -> Unit)? = null
+    var onOutOfStockClickListener: ((OrderFromWb) -> Unit)? = null
     inner class OrderViewHolder(private val binding: ActivityOrderFromWbBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
@@ -21,6 +24,18 @@ class OrderFromWbAdapter(private val orders: MutableList<OrderFromWb>) :
             val itemAdapter = ItemFromWBAdapter(order.items.toMutableList())
             binding.recyclerViewItems.layoutManager = LinearLayoutManager(binding.root.context)
             binding.recyclerViewItems.adapter = itemAdapter
+            order.items.forEach { elem ->
+                if (elem.is_active == "POSTPONED") {
+                    binding.buttonTransfer.isEnabled = false
+                    binding.buttonTransfer.setBackgroundResource(R.color.green_false)
+                }
+            }
+            binding.buttonCancel.setOnClickListener {
+                onActionClickListener?.invoke(order)
+            }
+            binding.buttonTransfer.setOnClickListener {
+                onOutOfStockClickListener?.invoke(order)
+            }
         }
     }
 
