@@ -29,20 +29,6 @@
         android:layout_marginTop="20dp"
         android:src="@drawable/qr_code" />
 
-    <Button
-        android:id="@+id/button_auth"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Сканировать"
-        android:textStyle="bold"
-        android:textSize="18sp"
-        android:textColor="@android:color/white"
-        android:layout_marginTop="30dp"
-        android:elevation="4dp"
-        android:padding="12dp"
-        android:background="@drawable/rounded_button"
-        android:backgroundTint="#FF6F61" />
 
 
 </LinearLayout>

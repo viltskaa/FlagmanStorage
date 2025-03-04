@@ -21,10 +21,6 @@ class PreferencesHelper(context: Context) {
         val uniqueKey = "${item.code}_${item.timestamp}" // Создаем уникальный ключ на основе штрихкода и временной метки
         editor.putString("${getUserKeyPrefix()}code_$uniqueKey", item.code)
         editor.putLong("${getUserKeyPrefix()}timestamp_$uniqueKey", item.timestamp)
-        // Можно добавить сохранение данных о положении устройства
-        editor.putFloat("${getUserKeyPrefix()}posX_$uniqueKey", item.positionX)
-        editor.putFloat("${getUserKeyPrefix()}posY_$uniqueKey", item.positionY)
-        editor.putFloat("${getUserKeyPrefix()}posZ_$uniqueKey", item.positionZ)
         editor.putString("${getUserKeyPrefix()}qrcode_$uniqueKey", item.qrcode)
         editor.apply()
     }
@@ -35,9 +31,6 @@ class PreferencesHelper(context: Context) {
         editor.remove("${getUserKeyPrefix()}code_$uniqueKey")
         editor.remove("${getUserKeyPrefix()}timestamp_$uniqueKey")
         // Удаляем данные о положении устройства
-        editor.remove("${getUserKeyPrefix()}posX_$uniqueKey")
-        editor.remove("${getUserKeyPrefix()}posY_$uniqueKey")
-        editor.remove("${getUserKeyPrefix()}posZ_$uniqueKey")
         editor.apply()
     }
 
@@ -54,9 +47,6 @@ class PreferencesHelper(context: Context) {
             editor.remove("${getUserKeyPrefix()}code_$uniqueKey")
             editor.remove("${getUserKeyPrefix()}timestamp_$uniqueKey")
             // Удаляем данные о положении устройства
-            editor.remove("${getUserKeyPrefix()}posX_$uniqueKey")
-            editor.remove("${getUserKeyPrefix()}posY_$uniqueKey")
-            editor.remove("${getUserKeyPrefix()}posZ_$uniqueKey")
             editor.apply()
         }
     }
@@ -70,12 +60,9 @@ class PreferencesHelper(context: Context) {
             if (key.startsWith("${getUserKeyPrefix()}code_") && value is String) {
                 val uniqueKey = key.replace("${getUserKeyPrefix()}code_", "")
                 val timestamp = sharedPreferences.getLong("${getUserKeyPrefix()}timestamp_$uniqueKey", 0L)
-                val positionX = sharedPreferences.getFloat("${getUserKeyPrefix()}posX_$uniqueKey", 0f)
-                val positionY = sharedPreferences.getFloat("${getUserKeyPrefix()}posY_$uniqueKey", 0f)
-                val positionZ = sharedPreferences.getFloat("${getUserKeyPrefix()}posZ_$uniqueKey", 0f)
                 val qrcode = sharedPreferences.getString("${getUserKeyPrefix()}qrcode_$uniqueKey", "")
                 if (timestamp != 0L && qrcode != null) {
-                    items.add(ScannedItem(value, timestamp, positionX, positionY, positionZ,  qrcode))
+                    items.add(ScannedItem(value, timestamp,  qrcode))
                 }
             }
         }

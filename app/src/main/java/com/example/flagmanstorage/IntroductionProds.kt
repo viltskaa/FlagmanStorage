@@ -1,7 +1,6 @@
 package com.example.flagmanstorage
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -18,10 +17,8 @@ import com.example.flagmanstorage.API.ApiClient
 import com.example.flagmanstorage.API.CheckResponse
 import com.example.flagmanstorage.API.Product
 import com.example.flagmanstorage.QrScanner.PreferencesHelper
-import com.example.flagmanstorage.QrScanner.QrScanner
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItem
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItemDisplayAdapter
-import com.example.flagmanstorage.QrScanner.User.LoginRequest
 import com.example.flagmanstorage.QrScanner.User.LoginResponse
 import com.example.flagmanstorage.QrScanner.User.RefreshRequest
 import com.example.flagmanstorage.QrScanner.UserPreferences
@@ -35,30 +32,13 @@ import retrofit2.Response
 class IntroductionProds : AppCompatActivity() {
 
     private lateinit var binding: ActivityIntroductionProdsBinding
-    private lateinit var qrScanner: QrScanner
     private lateinit var preferencesHelper: PreferencesHelper
     private lateinit var adapter: ScannedItemDisplayAdapter
     private lateinit var userPreferences: UserPreferences
-    private lateinit var sensorManager: SensorManager
-    private lateinit var accelerometer: Sensor
-    private var accelerometerValues = FloatArray(3) // x, y, z координаты
     private var isTorchOn = false
 
     private var buffer: String = ""
 
-    private val scanLauncher = registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
-        qrScanner.handleScanResult(result) { scannedCode ->
-            processScannedCode(scannedCode)
-        }
-    }
-
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-        if (isGranted) {
-            qrScanner.showCamera()
-        } else {
-            Toast.makeText(this, "Требуется разрешение на использование камеры", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,14 +53,10 @@ class IntroductionProds : AppCompatActivity() {
             finish()
         }
 
-        qrScanner = QrScanner(this, scanLauncher, requestPermissionLauncher)
 
         initViews()
         preferencesHelper = PreferencesHelper(this)
 
-        // Инициализация SensorManager и акселерометра
-        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)!!
 
         Thread {
             val scannedItems = preferencesHelper.getGroupedScannedItems()
@@ -110,29 +86,6 @@ class IntroductionProds : AppCompatActivity() {
         }
     }
 
-    private val sensorEventListener = object : SensorEventListener {
-        override fun onSensorChanged(event: SensorEvent) {
-            if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-                accelerometerValues[0] = event.values[0] // Данные по оси X
-                accelerometerValues[1] = event.values[1] // Данные по оси Y
-                accelerometerValues[2] = event.values[2] // Данные по оси Z
-            }
-        }
-
-        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        sensorManager.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        sensorManager.unregisterListener(sensorEventListener)
-    }
 
     @SuppressLint("NotifyDataSetChanged")
     private fun processScannedCode(scannedCode: String) {
@@ -146,9 +99,6 @@ class IntroductionProds : AppCompatActivity() {
             val scannedItem = ScannedItem(
                 code = code,
                 timestamp = timestamp,
-                positionX = 0.0f,
-                positionY = 0.0f,
-                positionZ = 0.0f,
                 qrcode = scannedCode
             )
 
@@ -183,9 +133,6 @@ class IntroductionProds : AppCompatActivity() {
     }
 
     private fun initViews() {
-        binding.buttonAdd.setOnClickListener {
-            qrScanner.checkCameraPermission { qrScanner.showCamera() }
-        }
         binding.buttonSend.setOnClickListener {
             val products = preferencesHelper.getScannedItems()
             if (products.isNotEmpty()) {

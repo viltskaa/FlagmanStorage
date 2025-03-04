@@ -13,7 +13,6 @@ class ScannedItemAdapter(private var scannedItems: MutableList<ScannedItem>, pri
         RecyclerView.ViewHolder(binding.root) {
         fun bind(scannedItem: ScannedItem) {
             binding.textViewCode.text = scannedItem.code
-            binding.textCords.text="X: " + scannedItem.positionX.toString() + " Y:" + scannedItem.positionY.toString() + " Z:" + scannedItem.positionZ.toString()
             binding.buttonAction.setOnClickListener {
                 preferencesHelper.removeScannedItem(scannedItem)
                 removeItem(adapterPosition)

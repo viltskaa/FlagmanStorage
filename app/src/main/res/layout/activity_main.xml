@@ -27,14 +27,6 @@
             android:textSize="18sp"
             android:textColor="#fdfdfd" />
 
-        <ImageButton
-            android:id="@+id/btn_set"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:src="@drawable/settings"
-            android:background="@android:color/transparent"
-            android:contentDescription="Настройки" />
 
         <ImageButton
             android:id="@+id/btn_logout"

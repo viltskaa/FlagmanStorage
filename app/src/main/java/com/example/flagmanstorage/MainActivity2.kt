@@ -2,13 +2,10 @@ package com.example.flagmanstorage
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import com.example.flagmanstorage.API.APIService
 import com.example.flagmanstorage.API.ApiClient
-import com.example.flagmanstorage.QrScanner.QrScanner
 import com.example.flagmanstorage.QrScanner.User.LoginRequest
 import com.example.flagmanstorage.QrScanner.User.LoginResponse
 import com.example.flagmanstorage.QrScanner.UserPreferences
@@ -23,45 +20,19 @@ import retrofit2.Response
 
 class MainActivity2 : TwoDimScannerActivity() {
     private lateinit var binding: ActivityMain2Binding
-    private lateinit var qrScanner: QrScanner
     private lateinit var userPreferences: UserPreferences
     private var buffer: String = ""
 
-    private val scanLauncher = registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
-        qrScanner.handleQrScanResult(result,
-            { scannedCode ->
-                handleScanResult(scannedCode)
-            },
-            {
-                Toast.makeText(this, "Ошибка при разборе данных QR-кода", Toast.LENGTH_SHORT).show()
-            })
-    }
-
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-        if (isGranted) {
-            qrScanner.showCameraForQrOnly()
-        } else {
-            Toast.makeText(this, "Требуется разрешение на использование камеры", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initBinding()
-        initViews()
         binding.root.isFocusable = true
         binding.root.isFocusableInTouchMode = true
         binding.root.requestFocus()
-        // Инициализация экземпляра QrScanner
-        qrScanner = QrScanner(this, scanLauncher, requestPermissionLauncher)
         super.setCallbackAfterScan(::handleScanResult)
     }
 
-    private fun initViews() {
-        binding.buttonAuth.setOnClickListener {
-            handleScanResult("nameolga,surnamebutuzova,patronymichz,password1234567")
-        }
-    }
 
     private fun handleScanResult(scannedCode: String) {
         if (scannedCode.isNotEmpty()) {

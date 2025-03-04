@@ -13,14 +13,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         userPreferences = UserPreferences(this)
+        initBinding()
+        binding.root.isFocusable = true
+        binding.root.isFocusableInTouchMode = true
+        binding.root.requestFocus()
         if (!userPreferences.isLoggedIn()) {
             val intent = Intent(this, MainActivity2::class.java)
             startActivity(intent)
             finish()
         }
-        initBinding()
         initViews()
 
 
@@ -37,10 +39,6 @@ class MainActivity : AppCompatActivity() {
         }
         binding.btnRepack.setOnClickListener{
             val intent = Intent(this, WriteOffActivity::class.java)
-            startActivity(intent)
-        }
-        binding.btnSet.setOnClickListener {
-            val intent = Intent(this,SettingsActivity::class.java)
             startActivity(intent)
         }
         binding.btnRefund.setOnClickListener {

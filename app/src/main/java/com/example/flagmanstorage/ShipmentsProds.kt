@@ -1,6 +1,5 @@
 package com.example.flagmanstorage
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -15,15 +14,8 @@ import com.example.flagmanstorage.API.ShipRequest
 import com.example.flagmanstorage.API.ShipmentItemsStatusResponse
 import com.example.flagmanstorage.API.StockRequest
 import com.example.flagmanstorage.API.StockResponse
-import com.example.flagmanstorage.API.UniqueItem
-import com.example.flagmanstorage.API.UpdateRequest
-import com.example.flagmanstorage.QrScanner.PreferencesHelper
-import com.example.flagmanstorage.QrScanner.QrScanner
-import com.example.flagmanstorage.QrScanner.ScannedItem.ItemFromWB
-import com.example.flagmanstorage.QrScanner.ScannedItem.ItemFromWBAdapter
 import com.example.flagmanstorage.QrScanner.ScannedItem.OrderFromWb
 import com.example.flagmanstorage.QrScanner.ScannedItem.OrderFromWbAdapter
-import com.example.flagmanstorage.QrScanner.User.LoginRequest
 import com.example.flagmanstorage.QrScanner.User.LoginResponse
 import com.example.flagmanstorage.QrScanner.User.RefreshRequest
 import com.example.flagmanstorage.QrScanner.UserPreferences
@@ -38,30 +30,16 @@ import retrofit2.Response
 class ShipmentsProds : TwoDimScannerActivity() {
 
     private lateinit var binding: ActivityShipmentsProdsBinding // Замените на соответствующий класс привязки
-    private lateinit var qrScanner: QrScanner
     private lateinit var itemAdapter: OrderFromWbAdapter
     private lateinit var buttonSuccess: Button
     private lateinit var userPreferences: UserPreferences
     private var buffer: String = ""
-    private val scanLauncher = registerForActivityResult(ScanContract()) { result: ScanIntentResult ->
-        qrScanner.handleScanResult(result) { scannedCode ->
-            processScannedCode(scannedCode)
-        }
-    }
 
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-        if (isGranted) {
-            qrScanner.showCamera()
-        } else {
-            Toast.makeText(this, "Требуется разрешение на использование камеры", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initBinding()
         Log.d("ShipmentsProds", "Заход на страницу ShipmentsProds")
-        qrScanner = QrScanner(this, scanLauncher, requestPermissionLauncher)
         buttonSuccess = findViewById(R.id.button_ship)
         binding.root.isFocusable = true
         binding.root.isFocusableInTouchMode = true

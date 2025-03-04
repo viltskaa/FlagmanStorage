@@ -31,12 +31,6 @@ interface APIService {
     @GET("/v1/shipment_item")
     fun getItems(): Call<List<OrderFromWb>>
 
-    @GET("/v1/item/report")
-    fun report(): Call<ResponseBody>
-
-    @POST("/v1/shipment_item/updateByArticle")
-    fun updateByArticle(@Body item: UpdateRequest): Call<Void>
-
     @GET("/v1/shipment_item/checkShipmentItems")
     fun checkShipmentItems(): Call<ShipmentItemsStatusResponse>
 
