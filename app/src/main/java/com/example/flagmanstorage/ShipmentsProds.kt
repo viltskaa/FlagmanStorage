@@ -1,7 +1,9 @@
 package com.example.flagmanstorage
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -33,6 +35,8 @@ class ShipmentsProds : TwoDimScannerActivity() {
     private lateinit var itemAdapter: OrderFromWbAdapter
     private lateinit var buttonSuccess: Button
     private lateinit var userPreferences: UserPreferences
+    private var currentOrderUid: String = ""
+    private var state = true
     private var buffer: String = ""
 
 
@@ -55,7 +59,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
             handleCancelOrder(product)
         }
         itemAdapter.onOutOfStockClickListener = { product ->
-            outOfStock(product)
+            handleOutOfStockOrder(product)
         }
         fetchItemsFromServer()
     }
@@ -67,11 +71,16 @@ class ShipmentsProds : TwoDimScannerActivity() {
     }
 
     private fun handleScanResult(scannedCode: String) {
-        if (scannedCode.isNotEmpty()) {
-            val newRequest = ShipRequest(scannedCode)
-            sendScannedCodeToServer(newRequest)
+        if (state) {
+            if (scannedCode.isNotEmpty()) {
+                val newRequest = ShipRequest(scannedCode)
+                sendScannedCodeToServer(newRequest)
+            } else {
+                Toast.makeText(this, "Сканированный код пустой", Toast.LENGTH_SHORT).show()
+            }
         } else {
-            Toast.makeText(this, "Сканированный код пустой", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "$scannedCode", Toast.LENGTH_SHORT).show()
+            outOfStock(scannedCode, currentOrderUid)
         }
     }
 
@@ -163,9 +172,54 @@ class ShipmentsProds : TwoDimScannerActivity() {
         })
     }
 
-    private fun outOfStock(order: OrderFromWb) {
+
+    private fun handleOutOfStockOrder(order: OrderFromWb) {
+        state = false
+        currentOrderUid = order.orderUid
+        val alertDialog = AlertDialog.Builder(this)
+            .setMessage("Чтобы перенести заказ отсканируйте qr бригадира")
+            .setNegativeButton("Отмена") { dialog, which ->
+                state = true
+            }
+            .create()
+
+        alertDialog.setCancelable(false)
+        alertDialog.setOnShowListener {
+            val negativeButton = alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+            negativeButton.clearFocus()
+
+
+            negativeButton.isFocusable = false
+            negativeButton.isFocusableInTouchMode = false
+
+            binding.root.requestFocus()
+        }
+        alertDialog.setOnKeyListener { _: DialogInterface, keyCode: Int, event: KeyEvent? ->
+            if (event != null && event.action == KeyEvent.ACTION_UP) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                    handleScanResult(buffer)
+                    buffer = ""
+                    state=true
+                    alertDialog.dismiss()
+                    return@setOnKeyListener true
+                } else if (keyCode != KeyEvent.KEYCODE_BACK) {
+                    buffer += event.unicodeChar.toChar()
+                }
+            }
+            return@setOnKeyListener false
+        }
+
+
+        alertDialog.show()
+    }
+
+    private fun outOfStock(scannedCode: String,orderUid: String) {
         val apiService = ApiClient.getClient(this).create(APIService::class.java)
-        val newRequest = StockRequest(order.orderUid,"baberzhon babir babirovich")
+        val qrcodeData = scannedCode.split(",")
+        val surname = qrcodeData[1].substring(7)
+        val name = qrcodeData[0].substring(4)
+        val patronymic = qrcodeData[2].substring(10)
+        val newRequest = StockRequest(orderUid,"$surname $name $patronymic")
         val call = apiService.outOfStock(newRequest)
 
         call.enqueue(object : Callback<StockResponse> {
