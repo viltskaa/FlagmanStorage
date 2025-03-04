@@ -125,7 +125,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
                     if (response.code() == 401) {
                         handleUnauthorizedError()
                     }else{
-                        Toast.makeText(this@ShipmentsProds, "Ошибка при сканировании: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@ShipmentsProds, "Ошибка при сканировании.", Toast.LENGTH_SHORT).show()
                     }
 
                 }
@@ -152,7 +152,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
                     if (response.code() == 401) {
                         handleUnauthorizedError()
                     }else{
-                        Toast.makeText(this@ShipmentsProds, "Ошибка отгрузки: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@ShipmentsProds, "Ошибка отгрузки.", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -177,7 +177,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
                     if (response.code() == 401) {
                         handleUnauthorizedError()
                     }else{
-                        Toast.makeText(this@ShipmentsProds, "Ошибка при одобрении: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@ShipmentsProds, "Ошибка при одобрении.", Toast.LENGTH_SHORT).show()
                     }
 
                 }
@@ -203,7 +203,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
                     if (response.code() == 401) {
                         handleUnauthorizedError()
                     }else{
-                        Toast.makeText(this@ShipmentsProds, "Ошибка проверки: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@ShipmentsProds, "Ошибка проверки.", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -245,7 +245,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
                     if (response.code() == 401) {
                         handleUnauthorizedError()
                     }else{
-                        Toast.makeText(this@ShipmentsProds, "Ошибка отмены: ${response.code()} ${response.message()}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@ShipmentsProds, "Ошибка отмены.", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -278,7 +278,7 @@ class ShipmentsProds : TwoDimScannerActivity() {
                     }
                     Toast.makeText(this@ShipmentsProds, loginResponse?.msg.toString(), Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this@ShipmentsProds, "Ошибка входа: ${response.message()}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ShipmentsProds, "Ошибка входа.", Toast.LENGTH_SHORT).show()
                 }
             }
 

@@ -150,7 +150,7 @@ class IntroductionProds : AppCompatActivity() {
                             if (response.code() == 401) {
                                 handleUnauthorizedError()
                             }else{
-                                Toast.makeText(this@IntroductionProds, "Response Code: ${response.code()}, Message: ${response.message()}", Toast.LENGTH_LONG).show()
+                                Toast.makeText(this@IntroductionProds, "Не удалось отправить список", Toast.LENGTH_LONG).show()
                             }
 
                         }
@@ -200,7 +200,7 @@ class IntroductionProds : AppCompatActivity() {
                     }
                     Toast.makeText(this@IntroductionProds, loginResponse?.msg.toString(), Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this@IntroductionProds, "Ошибка входа: ${response.message()}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@IntroductionProds, "Ошибка входа", Toast.LENGTH_SHORT).show()
                 }
             }
 

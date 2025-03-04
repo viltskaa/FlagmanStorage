@@ -72,7 +72,7 @@ class MainActivity2 : TwoDimScannerActivity() {
                             Toast.makeText(this@MainActivity2, "Ошибка при получении токена", Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        Toast.makeText(this@MainActivity2, "Ошибка входа: ${response.message()}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@MainActivity2, "Ошибка входа", Toast.LENGTH_SHORT).show()
                     }
                 }
 

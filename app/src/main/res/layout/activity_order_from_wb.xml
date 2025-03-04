@@ -7,10 +7,35 @@
     android:layout_marginTop="12dp"
     android:padding="16dp">
 
-    <!-- Контейнер для кнопок -->
+    <TextView
+        android:id="@+id/textViewOrderUid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Order UID"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#FF6F61"
+        android:paddingBottom="8dp"/>
+    <TextView
+        android:id="@+id/textViewMagazine"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Magazine"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#FF6F61"
+        android:paddingBottom="8dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewItems"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+    />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:minHeight="48dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:layout_marginBottom="8dp">
@@ -37,23 +62,4 @@
             android:backgroundTint="#4CAF50"
             android:textColor="@android:color/white" />
     </LinearLayout>
-
-    <!-- Отображение идентификатора заказа -->
-    <TextView
-        android:id="@+id/textViewOrderUid"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Order UID"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="#FF6F61"
-        android:paddingBottom="8dp"/>
-
-    <!-- Установить RecyclerView с фиксированной высотой -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewItems"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-    />
 </LinearLayout>

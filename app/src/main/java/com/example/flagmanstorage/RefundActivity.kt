@@ -151,7 +151,7 @@ class RefundActivity : AppCompatActivity() {
                             if (response.code() == 401) {
                                 handleUnauthorizedError()
                             }else{
-                                Toast.makeText(this@RefundActivity, "Response Code: ${response.code()}, Message: ${response.message()}", Toast.LENGTH_LONG).show()
+                                Toast.makeText(this@RefundActivity, "Не удалось отправить список", Toast.LENGTH_LONG).show()
                             }
 
                         }
@@ -201,7 +201,7 @@ class RefundActivity : AppCompatActivity() {
                     }
                     Toast.makeText(this@RefundActivity, loginResponse?.msg.toString(), Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this@RefundActivity, "Ошибка входа: ${response.message()}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@RefundActivity, "Ошибка входа", Toast.LENGTH_SHORT).show()
                 }
             }
 

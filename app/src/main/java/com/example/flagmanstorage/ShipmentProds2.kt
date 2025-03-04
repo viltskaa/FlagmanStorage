@@ -126,7 +126,7 @@ class ShipmentProds2 : AppCompatActivity() {
                             }else{
                                 Toast.makeText(
                                     this@ShipmentProds2,
-                                    "Ошибка отправки кода: ${response.code()} ${response.message()}",
+                                    "Ошибка отправки кода",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
@@ -185,7 +185,7 @@ class ShipmentProds2 : AppCompatActivity() {
                     }
                     Toast.makeText(this@ShipmentProds2, loginResponse?.msg.toString(), Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this@ShipmentProds2, "Ошибка входа: ${response.message()}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ShipmentProds2, "Ошибка входа", Toast.LENGTH_SHORT).show()
                 }
             }
 

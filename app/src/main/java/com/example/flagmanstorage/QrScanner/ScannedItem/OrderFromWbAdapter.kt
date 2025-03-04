@@ -24,6 +24,11 @@ class OrderFromWbAdapter(private val orders: MutableList<OrderFromWb>) :
             val itemAdapter = ItemFromWBAdapter(order.items.toMutableList())
             binding.recyclerViewItems.layoutManager = LinearLayoutManager(binding.root.context)
             binding.recyclerViewItems.adapter = itemAdapter
+            for (elem in order.items) {
+                binding.textViewMagazine.text = elem.for_this
+                break
+            }
+
             order.items.forEach { elem ->
                 if (elem.is_active == "POSTPONED") {
                     binding.buttonTransfer.isEnabled = false

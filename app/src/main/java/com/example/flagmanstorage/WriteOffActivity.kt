@@ -144,7 +144,7 @@ class WriteOffActivity: AppCompatActivity() {
                         if (response.isSuccessful) {
                             Toast.makeText(
                                 this@WriteOffActivity,
-                                "Код успешно отправлен на сервер",
+                                "Список успешно отправлен!",
                                 Toast.LENGTH_SHORT
                             ).show()
                         } else {
@@ -153,7 +153,7 @@ class WriteOffActivity: AppCompatActivity() {
                             }else{
                                 Toast.makeText(
                                     this@WriteOffActivity,
-                                    "Ошибка отправки кода: ${response.code()} ${response.message()}",
+                                    "Ошибка отправки кода.",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
@@ -210,7 +210,7 @@ class WriteOffActivity: AppCompatActivity() {
                     }
                     Toast.makeText(this@WriteOffActivity, loginResponse?.msg.toString(), Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this@WriteOffActivity, "Ошибка входа: ${response.message()}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@WriteOffActivity, "Ошибка входа.", Toast.LENGTH_SHORT).show()
                 }
             }
 
