@@ -25,6 +25,9 @@
         android:theme="@style/Theme.FlagmanStorage"
         tools:targetApi="31">
         <activity
+            android:name=".GetStickers"
+            android:exported="false" />
+        <activity
             android:name=".RefundActivity"
             android:exported="false" />
         <activity

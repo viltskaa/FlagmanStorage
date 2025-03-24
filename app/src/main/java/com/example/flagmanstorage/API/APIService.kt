@@ -1,5 +1,6 @@
 package com.example.flagmanstorage.API
 
+import com.example.flagmanstorage.QrScanner.ScannedItem.ApiResponse
 import com.example.flagmanstorage.QrScanner.ScannedItem.ItemFromWB
 import com.example.flagmanstorage.QrScanner.ScannedItem.OrderFromWb
 import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItem
@@ -24,6 +25,10 @@ interface APIService {
 
     @POST("/v1/item/shipment")
     fun sendShipment(@Body scannedItems: List<Product>): Call<Void>
+
+    @POST("/v1/shipment_item/scanQrOnPalet")
+    fun scanQrOnPalet(@Body item: ShipRequest): Call<ApiResponse>
+
 
     @POST("/v1/item/unique")
     fun checkUnique(@Body uniqueItem: UniqueItem): Call<UniqueDataAnswer>

@@ -45,6 +45,10 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this,RefundActivity::class.java)
             startActivity(intent)
         }
+        binding.btnScanOnPallet.setOnClickListener {
+            val intent = Intent(this,GetStickers::class.java)
+            startActivity(intent)
+        }
     }
 
 
