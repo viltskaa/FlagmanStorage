@@ -50,7 +50,7 @@ class ShipmentProds2 : AppCompatActivity() {
 
 
         initViews()
-        preferencesHelper = PreferencesHelper(this)
+        preferencesHelper = PreferencesHelper(this,"ScannedItems")
 
 
         Thread {

@@ -7,8 +7,8 @@ import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItemDisplay
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
-class PreferencesHelper(context: Context) {
-    private val sharedPreferences = context.getSharedPreferences("ScannedItems", Context.MODE_PRIVATE)
+class PreferencesHelper(context: Context,private val storageName: String) {
+    private val sharedPreferences = context.getSharedPreferences(storageName, Context.MODE_PRIVATE)
     private val userPreferences = UserPreferences(context)
 
     private fun getUserKeyPrefix(): String {

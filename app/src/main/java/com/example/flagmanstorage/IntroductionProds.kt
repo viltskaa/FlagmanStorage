@@ -55,7 +55,7 @@ class IntroductionProds : AppCompatActivity() {
 
 
         initViews()
-        preferencesHelper = PreferencesHelper(this)
+        preferencesHelper = PreferencesHelper(this,"ScannedItems")
 
 
         Thread {
@@ -118,7 +118,12 @@ class IntroductionProds : AppCompatActivity() {
                                 Toast.makeText(this@IntroductionProds, "Товар уже на складе", Toast.LENGTH_SHORT).show()
                             }
                         } else {
-                            Toast.makeText(this@IntroductionProds, "Ошибка проверки на сервере", Toast.LENGTH_SHORT).show()
+                            if (response.code() == 401) {
+                                handleUnauthorizedError()
+                            }else{
+                                Toast.makeText(this@IntroductionProds, "Не удалось отправить список", Toast.LENGTH_LONG).show()
+                            }
+
                         }
                     }
 

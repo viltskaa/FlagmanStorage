@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#FAF3E0"
-    tools:context=".ShipmentsProds">
+    tools:context=".ToShipmentsProds">
 
 
     <androidx.recyclerview.widget.RecyclerView

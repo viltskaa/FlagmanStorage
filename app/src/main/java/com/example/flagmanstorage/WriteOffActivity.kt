@@ -1,16 +1,10 @@
 package com.example.flagmanstorage
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.os.Bundle
 import android.view.KeyEvent
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.flagmanstorage.API.APIService
@@ -24,8 +18,6 @@ import com.example.flagmanstorage.QrScanner.User.LoginResponse
 import com.example.flagmanstorage.QrScanner.User.RefreshRequest
 import com.example.flagmanstorage.QrScanner.UserPreferences
 import com.example.flagmanstorage.databinding.ActivityIntroductionProdsBinding
-import com.journeyapps.barcodescanner.ScanContract
-import com.journeyapps.barcodescanner.ScanIntentResult
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -57,7 +49,7 @@ class WriteOffActivity: AppCompatActivity() {
         binding.root.requestFocus()
 
         initViews()
-        preferencesHelper = PreferencesHelper(this)
+        preferencesHelper = PreferencesHelper(this,"ScannedItemsWriteOff")
 
 
         Thread {
@@ -110,17 +102,29 @@ class WriteOffActivity: AppCompatActivity() {
                     override fun onResponse(call: Call<CheckResponse>, response: Response<CheckResponse>) {
                         if (response.isSuccessful) {
                             val exists = response.body()?.exists
-                            if (exists == "false") {
-                                preferencesHelper.saveScannedItem(scannedItem)
-                                adapter.notifyDataSetChanged()
-                                updateProductList()
-                            } else {
-                                Toast.makeText(this@WriteOffActivity, "Товар уже списан или был отгружен и не может быть списан", Toast.LENGTH_SHORT).show()
+
+                            when (exists) {
+                                "true" -> {
+                                    Toast.makeText(this@WriteOffActivity, "Товар уже списан или был отгружен и не может быть списан", Toast.LENGTH_SHORT).show()
+                                }
+                                "false" -> {
+                                    preferencesHelper.saveScannedItem(scannedItem)
+                                    adapter.notifyDataSetChanged()
+                                    updateProductList()
+                                }
+                                else -> {
+                                    Toast.makeText(this@WriteOffActivity, "Товар не найден в базе", Toast.LENGTH_SHORT).show()
+                                }
                             }
                         } else {
-                            Toast.makeText(this@WriteOffActivity, "Ошибка проверки на сервере", Toast.LENGTH_SHORT).show()
+                            if (response.code() == 401) {
+                                handleUnauthorizedError()
+                            } else {
+                                Toast.makeText(this@WriteOffActivity, "Не удалось отправить список", Toast.LENGTH_LONG).show()
+                            }
                         }
                     }
+
 
                     override fun onFailure(call: Call<CheckResponse>, t: Throwable) {
                         Toast.makeText(this@WriteOffActivity, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT).show()

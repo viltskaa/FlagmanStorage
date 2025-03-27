@@ -1,20 +1,15 @@
 package com.example.flagmanstorage.API
 
 import com.example.flagmanstorage.QrScanner.ScannedItem.ApiResponse
-import com.example.flagmanstorage.QrScanner.ScannedItem.ItemFromWB
 import com.example.flagmanstorage.QrScanner.ScannedItem.OrderFromWb
-import com.example.flagmanstorage.QrScanner.ScannedItem.ScannedItem
 import com.example.flagmanstorage.QrScanner.User.LoginRequest
 import com.example.flagmanstorage.QrScanner.User.LoginResponse
 import com.example.flagmanstorage.QrScanner.User.RefreshRequest
-import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.Body
-import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 interface APIService {
     @POST("/v1/item/product")
@@ -36,14 +31,23 @@ interface APIService {
     @GET("/v1/shipment_item")
     fun getItems(): Call<List<OrderFromWb>>
 
+    @GET("/v1/shipment_item/toShipment")
+    fun getItemsToShip(): Call<List<OrderFromWb>>
+
     @GET("/v1/shipment_item/checkShipmentItems")
     fun checkShipmentItems(): Call<ShipmentItemsStatusResponse>
 
-    @POST("/v1/shipment_item/ship")
-    fun ship(): Call<Void>
-
+    @GET("/v1/shipment_item/checkShipmentItemsToShip")
+    fun checkShipmentItemsToShip(): Call<ShipmentItemsStatusResponse>
+    @POST("/v1/shipment_item/to_ship")
+    fun to_ship(): Call<Void>
+    @POST("/v1/shipment_item/shipmentAll")
+    fun shipmentAll(): Call<Void>
     @POST("/v1/shipment_item/scanQr")
     fun scanQrShip(@Body item: ShipRequest): Call<Void>
+
+    @POST("/v1/shipment_item/scanQrToShip")
+    fun scanQrToShip(@Body item: ShipRequest): Call<Void>
 
     @POST("/v1/shipment_item/outOfStock")
 
@@ -67,7 +71,10 @@ interface APIService {
     fun sendRefund(@Body scannedItems: List<Product>): Call<Void>
 
     @POST("/v1/shipment_item/cancel/{orderUid}")
+    fun cancel(
+        @Path("orderUid") orderUid: String,
+        @Body requestBody: Map<String, Boolean>
+    ): Call<Void>
 
-    fun cancel(@Path("orderUid") orderUid: String): Call<Void>
 
 }

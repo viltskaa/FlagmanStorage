@@ -56,7 +56,7 @@ class RefundActivity : AppCompatActivity() {
 
 
         initViews()
-        preferencesHelper = PreferencesHelper(this)
+        preferencesHelper = PreferencesHelper(this,"ScannedItemsRefund")
 
 
         Thread {
@@ -111,17 +111,32 @@ class RefundActivity : AppCompatActivity() {
                     override fun onResponse(call: Call<CheckResponse>, response: Response<CheckResponse>) {
                         if (response.isSuccessful) {
                             val exists = response.body()?.exists
-                            if (exists == "false") {
-                                preferencesHelper.saveScannedItem(scannedItem)
-                                adapter.notifyDataSetChanged()
-                                updateProductList()
-                            } else {
-                                Toast.makeText(this@RefundActivity, "Товар уже имеет статус возврат или никуда со склада не уходил", Toast.LENGTH_SHORT).show()
+
+                            when (exists) {
+                                "false" -> {
+                                    preferencesHelper.saveScannedItem(scannedItem)
+                                    adapter.notifyDataSetChanged()
+                                    updateProductList()
+                                }
+                                "true" -> {
+                                    Toast.makeText(this@RefundActivity, "Товар уже имеет статус возврат или никуда со склада не уходил", Toast.LENGTH_SHORT).show()
+                                }
+                                "not_found" -> {
+                                    Toast.makeText(this@RefundActivity, "Товар не найден в базе", Toast.LENGTH_SHORT).show()
+                                }
+                                else -> {
+                                    Toast.makeText(this@RefundActivity, "Ошибка сервера", Toast.LENGTH_SHORT).show()
+                                }
                             }
                         } else {
-                            Toast.makeText(this@RefundActivity, "Ошибка проверки на сервере", Toast.LENGTH_SHORT).show()
+                            if (response.code() == 401) {
+                                handleUnauthorizedError()
+                            } else {
+                                Toast.makeText(this@RefundActivity, "Не удалось отправить список", Toast.LENGTH_LONG).show()
+                            }
                         }
                     }
+
 
                     override fun onFailure(call: Call<CheckResponse>, t: Throwable) {
                         Toast.makeText(this@RefundActivity, "Ошибка сети: ${t.message}", Toast.LENGTH_SHORT).show()

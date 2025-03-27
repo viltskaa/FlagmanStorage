@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         binding.btnAddToShipping.setOnClickListener{
-            val intent = Intent(this, ShipmentsProds::class.java)
+            val intent = Intent(this, ToShipmentsProds::class.java)
             startActivity(intent)
         }
         binding.btnRepack.setOnClickListener{
@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         binding.btnScanOnPallet.setOnClickListener {
-            val intent = Intent(this,GetStickers::class.java)
+            val intent = Intent(this,ShipmentsProds::class.java)
             startActivity(intent)
         }
     }
